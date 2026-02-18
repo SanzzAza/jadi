@@ -1,181 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Captain Sapimu - API Documentation</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0a0f1a;--bg2:#111827;--bg3:#1a2332;--border:#1e293b;--accent:#3b82f6;--accent2:#60a5fa;--green:#10b981;--yellow:#f59e0b;--red:#ef4444;--purple:#8b5cf6;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--sidebar-w:280px}
-body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
-.sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;z-index:100;transition:transform .3s}
-.sidebar-header{padding:20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:10}
-.sidebar-header h1{font-size:18px;background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
-.sidebar-header p{font-size:11px;color:var(--text3)}
-.sidebar-search{padding:12px 16px;border-bottom:1px solid var(--border);position:sticky;top:80px;background:var(--bg2);z-index:10}
-.sidebar-search input{width:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none}
-.sidebar-search input:focus{border-color:var(--accent)}
-.sidebar-search input::placeholder{color:var(--text3)}
-.sidebar-stats{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px}
-.stat-badge{flex:1;text-align:center;padding:6px;background:var(--bg3);border-radius:6px}
-.stat-badge .num{font-size:16px;font-weight:700;color:var(--accent2)}
-.stat-badge .label{font-size:9px;color:var(--text3);text-transform:uppercase}
-.sidebar-nav{padding:8px 0}
-.nav-item{display:flex;align-items:center;padding:8px 16px;cursor:pointer;transition:all .15s;border-left:3px solid transparent;gap:10px}
-.nav-item:hover{background:var(--bg3)}
-.nav-item.active{background:rgba(59,130,246,.1);border-left-color:var(--accent)}
-.nav-item .nav-icon{width:28px;height:28px;border-radius:6px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--accent2)}
-.nav-item .nav-name{font-size:13px;font-weight:500;flex:1}
-.nav-item .nav-count{font-size:11px;color:var(--text3);background:var(--bg);padding:2px 6px;border-radius:10px}
-.nav-item .nav-status{font-size:9px;margin-left:4px}
-.main{margin-left:var(--sidebar-w);min-height:100vh}
-.hero{padding:60px 40px 40px;background:linear-gradient(180deg,rgba(59,130,246,.08) 0%,transparent 100%);border-bottom:1px solid var(--border)}
-.hero h1{font-size:36px;font-weight:800;margin-bottom:12px}
-.hero h1 span{background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero p{color:var(--text2);font-size:16px;max-width:600px;margin-bottom:24px}
-.hero-badges{display:flex;gap:12px;flex-wrap:wrap}
-.hero-badge{padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text2)}
-.hero-badge strong{color:var(--accent2)}
-.loading-bar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:3px;background:var(--bg3);z-index:200;display:none}
-.loading-bar.show{display:block}
-.loading-bar .progress{height:100%;background:linear-gradient(90deg,var(--accent),var(--purple));transition:width .3s;width:0}
-.auth-section{padding:24px 40px;background:var(--bg2);border-bottom:1px solid var(--border)}
-.auth-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px 20px;max-width:700px}
-.auth-box h3{font-size:14px;color:var(--yellow);margin-bottom:8px}
-.token-row{display:flex;gap:8px;margin-bottom:6px}
-.token-row input{flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-family:'Fira Code',monospace;font-size:12px;color:var(--green);outline:none}
-.token-row button{padding:8px 14px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;background:var(--accent);color:#fff}
-.token-status{font-size:11px;display:flex;align-items:center;gap:6px}
-.token-dot{width:8px;height:8px;border-radius:50%}
-.token-dot.active{background:var(--green)}
-.token-dot.inactive{background:var(--red)}
-.prefetch-status{margin-top:10px;padding:8px 12px;background:var(--bg);border-radius:6px;font-size:11px;color:var(--text3)}
-.prefetch-status.loading{color:var(--yellow)}
-.prefetch-status.done{color:var(--green)}
-.prefetch-status.error{color:var(--red)}
-.content{padding:30px 40px}
-.platform-section{margin-bottom:50px;scroll-margin-top:20px}
-.platform-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
-.platform-icon{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff}
-.platform-header h2{font-size:24px;font-weight:700}
-.platform-header .platform-meta{font-size:12px;color:var(--text3)}
-.platform-header .platform-meta code{background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--accent2)}
-.endpoint-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden;transition:border-color .2s}
-.endpoint-card:hover{border-color:var(--accent)}
-.endpoint-header{display:flex;align-items:center;padding:12px 16px;gap:12px;cursor:pointer;user-select:none}
-.method-badge{padding:4px 10px;border-radius:4px;font-size:11px;font-weight:700;font-family:monospace;min-width:50px;text-align:center}
-.method-GET{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3)}
-.method-POST{background:rgba(59,130,246,.15);color:var(--accent2);border:1px solid rgba(59,130,246,.3)}
-.endpoint-path{font-family:'Fira Code',monospace;font-size:13px;color:var(--text);flex:1}
-.endpoint-path .param{color:var(--yellow)}
-.endpoint-desc{font-size:12px;color:var(--text3);max-width:300px;text-align:right}
-.endpoint-toggle{color:var(--text3);font-size:12px;transition:transform .2s}
-.endpoint-card.open .endpoint-toggle{transform:rotate(180deg)}
-.endpoint-detail{display:none;padding:0 16px 16px;border-top:1px solid var(--border)}
-.endpoint-card.open .endpoint-detail{display:block}
-.detail-section{margin-top:12px}
-.detail-section h4{font-size:11px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
-.param-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;padding:12px;background:var(--bg);border-radius:6px;border:1px solid var(--border)}
-.param-item{display:flex;flex-direction:column;gap:4px}
-.param-item label{font-size:10px;color:var(--yellow);font-weight:600;text-transform:uppercase}
-.param-item label .req{color:var(--red)}
-.param-item label .opt{color:var(--text3);font-weight:400}
-.param-item input,.param-item select{padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:monospace;font-size:12px;outline:none;width:100%}
-.param-item input:focus,.param-item select:focus{border-color:var(--yellow)}
-.param-item select{cursor:pointer}
-.param-item select.loaded{border-color:var(--green)}
-.param-item select.error{border-color:var(--red)}
-.page-ctrl{display:flex;align-items:center;gap:4px}
-.page-ctrl input{width:50px;text-align:center}
-.page-ctrl button{width:26px;height:26px;border:1px solid var(--border);background:var(--bg3);color:var(--text);border-radius:4px;cursor:pointer;font-size:14px}
-.page-ctrl button:hover{background:var(--border)}
-.try-section{margin-top:12px;padding:12px;background:var(--bg);border-radius:6px;border:1px solid var(--border)}
-.try-url{display:flex;gap:8px}
-.try-url input{flex:1;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:monospace;font-size:12px;outline:none}
-.try-url button{padding:8px 14px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600}
-.btn-send{background:var(--accent);color:#fff}
-.btn-send:hover{background:var(--accent2)}
-.btn-copy{background:var(--bg3);color:var(--text2);border:1px solid var(--border)!important}
-.btn-curl{background:var(--bg3);color:var(--yellow);border:1px solid rgba(245,158,11,.3)!important}
-.response-box{margin-top:10px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;overflow:hidden;display:none}
-.response-header{display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg3);border-bottom:1px solid var(--border);font-size:11px;align-items:center}
-.response-status{font-weight:700}
-.response-status.ok{color:var(--green)}
-.response-status.err{color:var(--red)}
-.response-status.loading{color:var(--yellow)}
-.response-body{padding:12px;font-family:'Fira Code',monospace;font-size:11px;max-height:400px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;color:var(--text2)}
-.response-actions button{background:var(--bg);border:1px solid var(--border);color:var(--text3);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;margin-left:4px}
-.mobile-toggle{display:none;position:fixed;top:12px;left:12px;z-index:200;width:40px;height:40px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:18px;cursor:pointer}
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
-.overlay.show{display:block}
-::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-@media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.mobile-toggle{display:flex;align-items:center;justify-content:center}.hero{padding:70px 20px 30px}.hero h1{font-size:24px}.auth-section{padding:16px 20px}.content{padding:20px}.endpoint-desc{display:none}.param-grid{grid-template-columns:1fr 1fr}.loading-bar{left:0}}
-</style>
-</head>
-<body>
-
-<div class="loading-bar" id="loadingBar"><div class="progress" id="loadingProgress"></div></div>
-<button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
-<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-header"><h1>🎬 Captain Sapimu</h1><p>API Documentation v3.0</p></div>
-  <div class="sidebar-search"><input type="text" id="searchInput" placeholder="Search platform..." oninput="filterPlatforms()"></div>
-  <div class="sidebar-stats">
-    <div class="stat-badge"><div class="num" id="statPlatforms">42</div><div class="label">Platforms</div></div>
-    <div class="stat-badge"><div class="num" id="statEndpoints">0</div><div class="label">Endpoints</div></div>
-  </div>
-  <nav class="sidebar-nav" id="sidebarNav"></nav>
-</aside>
-
-<div class="main">
-  <div class="hero">
-    <h1>🎬 <span>Captain Sapimu</span> API</h1>
-    <p>42 platform short drama. IDs pre-loaded untuk instant access!</p>
-    <div class="hero-badges">
-      <div class="hero-badge"><strong id="badgePlatforms">42</strong> Platforms</div>
-      <div class="hero-badge"><strong id="badgeEndpoints">0</strong> Endpoints</div>
-      <div class="hero-badge"><strong>⚡ Instant</strong> IDs</div>
-      <div class="hero-badge"><strong>Multi-lang</strong></div>
-    </div>
-  </div>
-
-  <div class="auth-section">
-    <div class="auth-box">
-      <h3>🔐 Authentication</h3>
-      <div class="token-row">
-        <input type="text" id="tokenInput" placeholder="Paste token...">
-        <button onclick="saveToken()">💾 Save & Load IDs</button>
-      </div>
-      <div class="token-status">
-        <span class="token-dot inactive" id="tokenDot"></span>
-        <span id="tokenStatusText" style="color:var(--text3)">Token not set</span>
-      </div>
-      <div class="prefetch-status" id="prefetchStatus">Click "Save & Load IDs" to pre-fetch all drama IDs</div>
-    </div>
-  </div>
-
-  <div class="content" id="content"></div>
-</div>
-
 <script>
-const BASE = window.location.hostname === 'localhost' ? 'https://captain.sapimu.au' : '/api';
+const BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+  ? 'https://captain.sapimu.au' 
+  : '/api';
+
 const TOKEN_DEFAULT="53d25de32c37b0fcd2b14a9f834050493cc044d5039b5aff3283da73a8ef761b";
-const CACHE_KEY="sapimu_cache_v4";
+const CACHE_KEY="sapimu_cache_v5";
 const LANGS=[{c:"id",n:"Indonesian"},{c:"en",n:"English"},{c:"th",n:"Thai"},{c:"vi",n:"Vietnamese"},{c:"pt",n:"Portuguese"},{c:"es",n:"Spanish"},{c:"ja",n:"Japanese"},{c:"ko",n:"Korean"},{c:"zh",n:"Chinese"},{c:"ar",n:"Arabic"},{c:"fr",n:"French"},{c:"de",n:"German"}];
 
 let cache={ids:{},chapters:{}};
-let failedPlatforms = [];
+let failedPlatforms=[];
 
 function loadCache(){
-  try{
-    const stored=localStorage.getItem(CACHE_KEY);
-    if(stored){cache=JSON.parse(stored);console.log('Cache loaded:',Object.keys(cache.ids).length,'platforms');}
-  }catch(e){console.error('Cache load error:',e);}
+  try{const s=localStorage.getItem(CACHE_KEY);if(s){cache=JSON.parse(s);}}catch(e){}
 }
-
 function saveCache(){
-  try{localStorage.setItem(CACHE_KEY,JSON.stringify(cache));}catch(e){console.error('Cache save error:',e);}
+  try{localStorage.setItem(CACHE_KEY,JSON.stringify(cache));}catch(e){}
 }
 
 const P={
@@ -543,7 +382,12 @@ vigloo:{n:"Vigloo",l:"/api/v1/tabs",id:"id",t:"name",pa:"data",ep:[
 ]}
 };
 
+// ============================================
+// CORE FUNCTIONS
+// ============================================
 const getToken=()=>document.getElementById('tokenInput').value||localStorage.getItem('sapimu_token')||'';
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const extractParams=(p)=>(p.match(/:(\w+)/g)||[]).map(m=>m.slice(1));
 
 function saveToken(){
   const t=document.getElementById('tokenInput').value.trim();
@@ -552,7 +396,7 @@ function saveToken(){
   document.getElementById('tokenDot').className='token-dot active';
   document.getElementById('tokenStatusText').textContent='Active';
   document.getElementById('tokenStatusText').style.color='var(--green)';
-  cache = {ids:{},chapters:{}}; // Reset cache
+  cache={ids:{},chapters:{}};
   localStorage.removeItem(CACHE_KEY);
   prefetchAll();
 }
@@ -568,187 +412,175 @@ function loadToken(){
   }
 }
 
-// Fetch with retry
-async function fetchWithRetry(url, options, retries = 2) {
-  for (let i = 0; i <= retries; i++) {
-    try {
-      const r = await fetch(url, options);
-      if (r.ok) return r;
-      if (i === retries) return r;
-    } catch (e) {
-      if (i === retries) throw e;
-      await new Promise(res => setTimeout(res, 1000 * (i + 1))); // Wait before retry
-    }
-  }
-}
-
+// ============================================
+// SEQUENTIAL FETCH - 1 BY 1
+// ============================================
 async function prefetchAll(){
   const token=getToken();
   if(!token)return;
   
   const keys=Object.keys(P);
   const total=keys.length;
-  let done=0;
-  let success=0;
-  failedPlatforms = [];
+  let done=0,success=0;
+  failedPlatforms=[];
   
   document.getElementById('loadingBar').classList.add('show');
   document.getElementById('prefetchStatus').className='prefetch-status loading';
-  document.getElementById('prefetchStatus').textContent=`Loading 0/${total} platforms...`;
   
-  // Smaller batch size for stability
-  const batchSize=3;
-  for(let i=0;i<keys.length;i+=batchSize){
-    const batch=keys.slice(i,i+batchSize);
-    await Promise.all(batch.map(async k=>{
-      try{
-        const items = await fetchPlatformIds(k);
-        if(items.length > 0) success++;
-        else failedPlatforms.push(k);
-      }catch(e){
-        console.error(k,e);
-        failedPlatforms.push(k);
-      }
-      done++;
-      const pct=Math.round((done/total)*100);
-      document.getElementById('loadingProgress').style.width=pct+'%';
-      document.getElementById('prefetchStatus').textContent=`Loading ${done}/${total} platforms... (${success} success)`;
-      
-      const nav=document.querySelector(`.nav-item[data-key="${k}"]`);
-      if(nav){
-        nav.querySelector('.nav-status')?.remove();
-        const span=document.createElement('span');
-        span.className='nav-status';
-        if(cache.ids[k]?.length){
-          span.textContent='✓';
-          span.style.color='var(--green)';
-        } else {
-          span.textContent='✗';
-          span.style.color='var(--red)';
-        }
-        nav.appendChild(span);
-      }
-    }));
+  // ONE BY ONE - no parallel!
+  for(const k of keys){
+    done++;
+    document.getElementById('prefetchStatus').textContent=`[${done}/${total}] Loading ${P[k].n}...`;
+    document.getElementById('loadingProgress').style.width=Math.round((done/total)*100)+'%';
     
-    // Small delay between batches
-    if(i + batchSize < keys.length) {
-      await new Promise(r => setTimeout(r, 300));
+    try{
+      const items=await fetchPlatformIds(k);
+      if(items.length>0) success++;
+      else failedPlatforms.push(k);
+    }catch(e){
+      console.error(k,e);
+      failedPlatforms.push(k);
     }
+    
+    // Update sidebar
+    updateNavStatus(k);
+    
+    // Save after each success
+    if(cache.ids[k]?.length) saveCache();
+    
+    // Delay between each request
+    await wait(500);
   }
   
   document.getElementById('loadingBar').classList.remove('show');
-  
-  const totalIds = Object.values(cache.ids).reduce((a,b)=>a+b.length,0);
-  
-  if(failedPlatforms.length === 0){
-    document.getElementById('prefetchStatus').className='prefetch-status done';
-    document.getElementById('prefetchStatus').textContent=`✓ All ${total} platforms loaded! (${totalIds} IDs cached)`;
-  } else {
-    document.getElementById('prefetchStatus').className='prefetch-status error';
-    document.getElementById('prefetchStatus').innerHTML=`⚠ ${success}/${total} loaded (${totalIds} IDs). <button onclick="retryFailed()" style="background:var(--yellow);color:#000;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;margin-left:8px">Retry ${failedPlatforms.length} failed</button>`;
-  }
-  
-  saveCache();
+  finishPrefetch(success,total);
   populateAllDropdowns();
-}
-
-// Retry failed platforms
-async function retryFailed() {
-  if(failedPlatforms.length === 0) return;
-  
-  const toRetry = [...failedPlatforms];
-  failedPlatforms = [];
-  
-  document.getElementById('prefetchStatus').className='prefetch-status loading';
-  document.getElementById('prefetchStatus').textContent=`Retrying ${toRetry.length} platforms...`;
-  
-  for(const k of toRetry) {
-    try {
-      await fetchPlatformIds(k);
-      const nav=document.querySelector(`.nav-item[data-key="${k}"]`);
-      if(nav && cache.ids[k]?.length){
-        nav.querySelector('.nav-status')?.remove();
-        const span=document.createElement('span');
-        span.className='nav-status';
-        span.textContent='✓';
-        span.style.color='var(--green)';
-        nav.appendChild(span);
-      }
-    } catch(e) {
-      failedPlatforms.push(k);
-    }
-    await new Promise(r => setTimeout(r, 500));
-  }
-  
-  saveCache();
-  populateAllDropdowns();
-  
-  const totalIds = Object.values(cache.ids).reduce((a,b)=>a+b.length,0);
-  if(failedPlatforms.length === 0){
-    document.getElementById('prefetchStatus').className='prefetch-status done';
-    document.getElementById('prefetchStatus').textContent=`✓ All platforms loaded! (${totalIds} IDs)`;
-  } else {
-    document.getElementById('prefetchStatus').className='prefetch-status error';
-    document.getElementById('prefetchStatus').innerHTML=`⚠ ${failedPlatforms.length} still failed. <button onclick="retryFailed()" style="background:var(--yellow);color:#000;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;margin-left:8px">Retry</button>`;
-  }
 }
 
 async function fetchPlatformIds(k){
   const pl=P[k];
   if(!pl.l)return[];
-  
   if(cache.ids[k]?.length)return cache.ids[k];
   
   const token=getToken();
-  const url = `${BASE}/${k}${pl.l}`;
+  const url=`${BASE}/${k}${pl.l}`;
   
-  console.log(`Fetching: ${k}`);
-  
-  const r = await fetchWithRetry(url, {
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  
-  if(!r.ok) {
-    console.error(`${k} failed: ${r.status}`);
-    return [];
+  // Try up to 3 times
+  for(let attempt=0;attempt<3;attempt++){
+    try{
+      const r=await fetch(url,{
+        headers:{'Authorization':`Bearer ${token}`},
+        signal:AbortSignal.timeout(15000) // 15s timeout
+      });
+      
+      if(!r.ok){
+        if(attempt<2){await wait(1000*(attempt+1));continue;}
+        return[];
+      }
+      
+      const j=await r.json();
+      
+      let d=j;
+      if(pl.pa)for(const x of pl.pa.split('.'))d=d?.[x];
+      if(!Array.isArray(d))d=d?.list||d?.dramas||d?.items||d?.hall_list||Object.values(d||{})[0]||[];
+      if(!Array.isArray(d))d=[];
+      
+      const items=d.slice(0,50).map(i=>({
+        id:String(i[pl.id]||i.id||i.book_id||i.bookId||i.code||i.playlet_id||i.dcup||''),
+        t:(i[pl.t]||i.title||i.name||i.bookName||'Unknown').substring(0,40)
+      })).filter(x=>x.id);
+      
+      cache.ids[k]=items;
+      return items;
+    }catch(e){
+      console.warn(`${k} attempt ${attempt+1} failed:`,e.message);
+      if(attempt<2)await wait(2000*(attempt+1));
+    }
   }
-  
-  const j = await r.json();
-  
-  let d=j;
-  if(pl.pa)for(const x of pl.pa.split('.'))d=d?.[x];
-  if(!Array.isArray(d))d=d?.list||d?.dramas||d?.items||d?.hall_list||Object.values(d||{})[0]||[];
-  if(!Array.isArray(d))d=[];
-  
-  const items=d.slice(0,50).map(i=>({
-    id:String(i[pl.id]||i.id||i.book_id||i.bookId||i.code||i.playlet_id||i.dcup||''),
-    t:(i[pl.t]||i.title||i.name||i.bookName||'Unknown').substring(0,40)
-  })).filter(x=>x.id);
-  
-  console.log(`${k}: ${items.length} items`);
-  cache.ids[k]=items;
-  return items;
+  return[];
 }
 
+function updateNavStatus(k){
+  const nav=document.querySelector(`.nav-item[data-key="${k}"]`);
+  if(!nav)return;
+  nav.querySelector('.nav-status')?.remove();
+  const span=document.createElement('span');
+  span.className='nav-status';
+  if(cache.ids[k]?.length){
+    span.textContent='✓ '+cache.ids[k].length;
+    span.style.color='var(--green)';
+  }else{
+    span.textContent='✗';
+    span.style.color='var(--red)';
+  }
+  nav.appendChild(span);
+}
+
+function finishPrefetch(success,total){
+  const totalIds=Object.values(cache.ids).reduce((a,b)=>a+b.length,0);
+  if(failedPlatforms.length===0){
+    document.getElementById('prefetchStatus').className='prefetch-status done';
+    document.getElementById('prefetchStatus').textContent=`✓ All ${total} loaded! (${totalIds} IDs)`;
+  }else{
+    document.getElementById('prefetchStatus').className='prefetch-status error';
+    document.getElementById('prefetchStatus').innerHTML=
+      `⚠ ${success}/${total} loaded (${totalIds} IDs). `+
+      `<button onclick="retryFailed()" style="background:var(--yellow);color:#000;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-weight:600">🔄 Retry ${failedPlatforms.length} failed</button>`+
+      `<br><small style="color:var(--text3);margin-top:4px;display:block">Failed: ${failedPlatforms.map(k=>P[k].n).join(', ')}</small>`;
+  }
+}
+
+async function retryFailed(){
+  if(!failedPlatforms.length)return;
+  const toRetry=[...failedPlatforms];
+  failedPlatforms=[];
+  let success=0;
+  
+  document.getElementById('prefetchStatus').className='prefetch-status loading';
+  
+  for(let i=0;i<toRetry.length;i++){
+    const k=toRetry[i];
+    document.getElementById('prefetchStatus').textContent=`Retrying [${i+1}/${toRetry.length}] ${P[k].n}...`;
+    
+    // Clear old cache to force re-fetch
+    delete cache.ids[k];
+    
+    try{
+      const items=await fetchPlatformIds(k);
+      if(items.length>0){success++;saveCache();}
+      else failedPlatforms.push(k);
+    }catch(e){
+      failedPlatforms.push(k);
+    }
+    
+    updateNavStatus(k);
+    await wait(1500); // Longer delay for retry
+  }
+  
+  const loaded=Object.keys(cache.ids).filter(k=>cache.ids[k]?.length).length;
+  finishPrefetch(loaded,Object.keys(P).length);
+  populateAllDropdowns();
+}
+
+// ============================================
+// DROPDOWNS
+// ============================================
 function populateAllDropdowns(){
   Object.keys(P).forEach(k=>{
     const items=cache.ids[k]||[];
-    
     P[k].ep.forEach((ep,i)=>{
-      const prs=extractParams(ep.p);
-      prs.forEach(pr=>{
+      extractParams(ep.p).forEach(pr=>{
         if(ep.pr?.[pr]===1){
           const sel=document.getElementById(`sel-${k}-${i}-${pr}`);
           if(sel){
-            if(items.length > 0) {
+            if(items.length>0){
               sel.innerHTML='<option value="">-- Select ('+items.length+') --</option>'+
                 items.map(d=>`<option value="${d.id}">${d.id} - ${d.t}</option>`).join('');
               sel.classList.add('loaded');
               sel.classList.remove('error');
-            } else {
+            }else{
               sel.innerHTML='<option value="">-- No data --</option>';
               sel.classList.add('error');
-              sel.classList.remove('loaded');
             }
           }
         }
@@ -757,19 +589,18 @@ function populateAllDropdowns(){
   });
 }
 
-const extractParams=(p)=>(p.match(/:(\w+)/g)||[]).map(m=>m.slice(1));
-
+// ============================================
+// URL BUILDER
+// ============================================
 function buildUrl(k,i){
   const ep=P[k].ep[i];
   let p=ep.p;
-  
   extractParams(p).forEach(pr=>{
     const sel=document.getElementById(`sel-${k}-${i}-${pr}`);
     const inp=document.getElementById(`inp-${k}-${i}-${pr}`);
     const v=sel?.value||inp?.value?.trim()||'';
     if(v)p=p.replace(`:${pr}`,encodeURIComponent(v));
   });
-  
   const qs=[];
   if(ep.ty==='list'){
     const page=document.getElementById(`q-${k}-${i}-page`)?.value;
@@ -786,7 +617,6 @@ function buildUrl(k,i){
       if(v)qs.push(`${qk}=${encodeURIComponent(v)}`);
     });
   }
-  
   if(qs.length)p+='?'+qs.join('&');
   return `${BASE}/${k}${p}`;
 }
@@ -805,6 +635,9 @@ function changePage(k,i,delta){
   updateUrl(k,i);
 }
 
+// ============================================
+// RENDER
+// ============================================
 let totalEp=0;Object.values(P).forEach(p=>totalEp+=p.ep.length);
 
 function renderSidebar(){
@@ -827,118 +660,49 @@ function renderContent(){
       const isList=ep.ty==='list';
       
       let paramHtml='<div class="param-grid">';
-      
       if(isList){
-        paramHtml+=`
-          <div class="param-item">
-            <label>page <span class="opt">(opt)</span></label>
-            <div class="page-ctrl">
-              <button onclick="changePage('${k}',${i},-1)">−</button>
-              <input type="number" id="q-${k}-${i}-page" value="1" min="1" oninput="updateUrl('${k}',${i})">
-              <button onclick="changePage('${k}',${i},1)">+</button>
-            </div>
-          </div>
-          <div class="param-item">
-            <label>limit <span class="opt">(opt)</span></label>
-            <input type="number" id="q-${k}-${i}-limit" value="20" oninput="updateUrl('${k}',${i})">
-          </div>
-          <div class="param-item">
-            <label>lang <span class="opt">(opt)</span></label>
-            <select id="q-${k}-${i}-lang" onchange="updateUrl('${k}',${i})">
-              <option value="">Auto</option>
-              ${LANGS.map(l=>`<option value="${l.c}"${l.c==='id'?' selected':''}>${l.n}</option>`).join('')}
-            </select>
-          </div>`;
+        paramHtml+=`<div class="param-item"><label>page <span class="opt">(opt)</span></label><div class="page-ctrl"><button onclick="changePage('${k}',${i},-1)">−</button><input type="number" id="q-${k}-${i}-page" value="1" min="1" oninput="updateUrl('${k}',${i})"><button onclick="changePage('${k}',${i},1)">+</button></div></div>
+        <div class="param-item"><label>limit <span class="opt">(opt)</span></label><input type="number" id="q-${k}-${i}-limit" value="20" oninput="updateUrl('${k}',${i})"></div>
+        <div class="param-item"><label>lang <span class="opt">(opt)</span></label><select id="q-${k}-${i}-lang" onchange="updateUrl('${k}',${i})"><option value="">Auto</option>${LANGS.map(l=>`<option value="${l.c}"${l.c==='id'?' selected':''}>${l.n}</option>`).join('')}</select></div>`;
       }
-      
       if(hasP){
         prs.forEach(pr=>{
-          const prType=ep.pr?.[pr];
-          if(prType===0){
-            paramHtml+=`
-              <div class="param-item">
-                <label>${pr} <span class="req">*</span></label>
-                <input type="text" id="inp-${k}-${i}-${pr}" placeholder="${pr}" oninput="updateUrl('${k}',${i})" value="${pr==='page'?'1':''}">
-              </div>`;
+          if(ep.pr?.[pr]===0){
+            paramHtml+=`<div class="param-item"><label>${pr} <span class="req">*</span></label><input type="text" id="inp-${k}-${i}-${pr}" placeholder="${pr}" oninput="updateUrl('${k}',${i})" value="${pr==='page'?'1':''}"></div>`;
           }else{
-            paramHtml+=`
-              <div class="param-item">
-                <label>${pr} <span class="req">*</span></label>
-                <select id="sel-${k}-${i}-${pr}" onchange="updateUrl('${k}',${i})">
-                  <option value="">Loading...</option>
-                </select>
-                <input type="text" id="inp-${k}-${i}-${pr}" placeholder="Or type ID" oninput="updateUrl('${k}',${i})" style="margin-top:4px;font-size:10px">
-              </div>`;
+            paramHtml+=`<div class="param-item"><label>${pr} <span class="req">*</span></label><select id="sel-${k}-${i}-${pr}" onchange="updateUrl('${k}',${i})"><option value="">Loading...</option></select><input type="text" id="inp-${k}-${i}-${pr}" placeholder="Or type ID" oninput="updateUrl('${k}',${i})" style="margin-top:4px;font-size:10px"></div>`;
           }
         });
       }
-      
       if(hasQ){
         Object.entries(ep.q).forEach(([qk,qd])=>{
           if(isList&&['page','limit','lang'].includes(qk))return;
-          paramHtml+=`
-            <div class="param-item">
-              <label>${qk} <span class="opt">(query)</span></label>
-              <input type="text" id="q-${k}-${i}-${qk}" placeholder="${qd}" oninput="updateUrl('${k}',${i})">
-            </div>`;
+          paramHtml+=`<div class="param-item"><label>${qk} <span class="opt">(query)</span></label><input type="text" id="q-${k}-${i}-${qk}" placeholder="${qd}" oninput="updateUrl('${k}',${i})"></div>`;
         });
       }
-      
       paramHtml+='</div>';
       
-      return `<div class="endpoint-card" id="${k}-${i}">
-        <div class="endpoint-header" onclick="toggle('${k}-${i}')">
-          <span class="method-badge method-${ep.m}">${ep.m}</span>
-          <span class="endpoint-path">${hl(ep.p)}</span>
-          <span class="endpoint-desc">${ep.d}</span>
-          <span class="endpoint-toggle">▼</span>
-        </div>
-        <div class="endpoint-detail">
-          <div class="detail-section">
-            <h4>Parameters</h4>
-            ${paramHtml}
-          </div>
-          <div class="try-section">
-            <div class="try-url">
-              <input type="text" value="${BASE}/${k}${ep.p}" id="url-${k}-${i}" readonly>
-              <button class="btn-copy" onclick="copy('url-${k}-${i}')">📋</button>
-              <button class="btn-curl" onclick="copyCurl('${k}',${i})">cURL</button>
-              <button class="btn-send" onclick="send('${k}',${i})">▶ Send</button>
-            </div>
-            <div class="response-box" id="resp-${k}-${i}">
-              <div class="response-header">
-                <span class="response-status" id="rs-${k}-${i}"></span>
-                <div class="response-actions"><span id="rz-${k}-${i}"></span><button onclick="copy('rb-${k}-${i}')">📋</button><button onclick="document.getElementById('resp-${k}-${i}').style.display='none'">✕</button></div>
-              </div>
-              <pre class="response-body" id="rb-${k}-${i}"></pre>
-            </div>
-          </div>
-        </div>
-      </div>`;
+      return `<div class="endpoint-card" id="${k}-${i}"><div class="endpoint-header" onclick="toggle('${k}-${i}')"><span class="method-badge method-${ep.m}">${ep.m}</span><span class="endpoint-path">${hl(ep.p)}</span><span class="endpoint-desc">${ep.d}</span><span class="endpoint-toggle">▼</span></div><div class="endpoint-detail"><div class="detail-section"><h4>Parameters</h4>${paramHtml}</div><div class="try-section"><div class="try-url"><input type="text" value="${BASE}/${k}${ep.p}" id="url-${k}-${i}" readonly><button class="btn-copy" onclick="copy('url-${k}-${i}')">📋</button><button class="btn-curl" onclick="copyCurl('${k}',${i})">cURL</button><button class="btn-send" onclick="send('${k}',${i})">▶ Send</button></div><div class="response-box" id="resp-${k}-${i}"><div class="response-header"><span class="response-status" id="rs-${k}-${i}"></span><div class="response-actions"><span id="rz-${k}-${i}"></span><button onclick="copy('rb-${k}-${i}')">📋</button><button onclick="document.getElementById('resp-${k}-${i}').style.display='none'">✕</button></div></div><pre class="response-body" id="rb-${k}-${i}"></pre></div></div></div></div>`;
     }).join('');
     
-    return `<div class="platform-section" id="p-${k}">
-      <div class="platform-header">
-        <div class="platform-icon">${pl.n.slice(0,2).toUpperCase()}</div>
-        <div><h2>${pl.n}</h2><div class="platform-meta">Base: <code>/${k}</code> · ${pl.ep.length} endpoints</div></div>
-      </div>
-      ${eps}
-    </div>`;
+    return `<div class="platform-section" id="p-${k}"><div class="platform-header"><div class="platform-icon">${pl.n.slice(0,2).toUpperCase()}</div><div><h2>${pl.n}</h2><div class="platform-meta">Base: <code>/${k}</code> · ${pl.ep.length} endpoints</div></div></div>${eps}</div>`;
   }).join('');
   
   content.innerHTML=html;
 }
 
+// ============================================
+// INTERACTIONS
+// ============================================
 const toggle=(id)=>document.getElementById(id).classList.toggle('open');
 const scrollTo=(k)=>{document.getElementById('p-'+k)?.scrollIntoView({behavior:'smooth'});document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.querySelector(`.nav-item[data-key="${k}"]`)?.classList.add('active');if(window.innerWidth<768)toggleSidebar();};
 const filterPlatforms=()=>{const q=document.getElementById('searchInput').value.toLowerCase();document.querySelectorAll('.nav-item').forEach(n=>{n.style.display=n.querySelector('.nav-name').textContent.toLowerCase().includes(q)?'flex':'none';});document.querySelectorAll('.platform-section').forEach(s=>{s.style.display=s.querySelector('h2').textContent.toLowerCase().includes(q)?'block':'none';});};
 const toggleSidebar=()=>{document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show');};
 const copy=(id)=>navigator.clipboard.writeText(document.getElementById(id).value||document.getElementById(id).textContent);
-const copyCurl=(k,i)=>{const url=buildUrl(k,i).replace('/api/','https://captain.sapimu.au/');navigator.clipboard.writeText(`curl "${url}" -H "Authorization: Bearer ${getToken()}"`);alert('Copied!');};
+const copyCurl=(k,i)=>{const url=buildUrl(k,i).replace(/^\/api\//,'https://captain.sapimu.au/');navigator.clipboard.writeText(`curl "${url}" -H "Authorization: Bearer ${getToken()}"`);alert('Copied!');};
 
 async function send(k,i){
   const t=getToken();if(!t)return alert('Set token first!');
-  
   const url=buildUrl(k,i);
   const ep=P[k].ep[i];
   const box=document.getElementById(`resp-${k}-${i}`);
@@ -960,7 +724,9 @@ async function send(k,i){
   }
 }
 
+// ============================================
 // INIT
+// ============================================
 document.getElementById('statPlatforms').textContent=Object.keys(P).length;
 document.getElementById('statEndpoints').textContent=totalEp;
 document.getElementById('badgePlatforms').textContent=Object.keys(P).length;
@@ -971,36 +737,41 @@ renderSidebar();
 renderContent();
 loadToken();
 
-// Check if on Vercel and test proxy
-if(BASE === '/api') {
-  fetch('/api').then(r=>r.json()).then(d=>{
-    console.log('Proxy status:', d);
-    if(d.status === 'ok') {
-      if(Object.keys(cache.ids).length>0){
-        populateAllDropdowns();
-        const totalIds = Object.values(cache.ids).reduce((a,b)=>a+b.length,0);
-        document.getElementById('prefetchStatus').className='prefetch-status done';
-        document.getElementById('prefetchStatus').textContent=`✓ Cache loaded! (${totalIds} IDs)`;
-      }else if(getToken()){
-        setTimeout(prefetchAll,500);
-      }
+// Start
+async function init(){
+  if(BASE==='/api'){
+    // Vercel - test proxy first
+    try{
+      const r=await fetch('/api/health-check-test-'+Date.now());
+      // Even 404 means proxy works
+      console.log('Proxy responding:', r.status);
+    }catch(e){
+      document.getElementById('prefetchStatus').className='prefetch-status error';
+      document.getElementById('prefetchStatus').textContent='❌ Proxy error: '+e.message;
+      return;
     }
-  }).catch(e=>{
-    console.error('Proxy error:', e);
-    document.getElementById('prefetchStatus').className='prefetch-status error';
-    document.getElementById('prefetchStatus').textContent='❌ Proxy not working. Check api/[...path].js';
-  });
-} else {
-  // Localhost
-  if(Object.keys(cache.ids).length>0){
+  }
+  
+  const cached=Object.keys(cache.ids).filter(k=>cache.ids[k]?.length).length;
+  if(cached>0){
     populateAllDropdowns();
-    const totalIds = Object.values(cache.ids).reduce((a,b)=>a+b.length,0);
-    document.getElementById('prefetchStatus').className='prefetch-status done';
-    document.getElementById('prefetchStatus').textContent=`✓ Cache loaded! (${totalIds} IDs)`;
+    // Update sidebar
+    Object.keys(cache.ids).forEach(k=>updateNavStatus(k));
+    const totalIds=Object.values(cache.ids).reduce((a,b)=>a+b.length,0);
+    
+    if(cached>=Object.keys(P).length){
+      document.getElementById('prefetchStatus').className='prefetch-status done';
+      document.getElementById('prefetchStatus').textContent=`✓ Cache loaded! (${totalIds} IDs, ${cached} platforms)`;
+    }else{
+      document.getElementById('prefetchStatus').className='prefetch-status done';
+      document.getElementById('prefetchStatus').innerHTML=
+        `✓ Cache: ${cached}/${Object.keys(P).length} platforms (${totalIds} IDs). `+
+        `<button onclick="prefetchAll()" style="background:var(--accent);color:#fff;border:none;padding:4px 12px;border-radius:4px;cursor:pointer">Load remaining</button>`;
+    }
   }else if(getToken()){
     setTimeout(prefetchAll,500);
   }
 }
+
+init();
 </script>
-</body>
-</html>
