@@ -1,13 +1,8 @@
 {
   "version": 2,
-  "rewrites": [
-    {
-      "source": "/api",
-      "destination": "/api/proxy"
-    },
-    {
-      "source": "/api/:path*",
-      "destination": "/api/proxy?slug=:path*"
+  "functions": {
+    "api/[...slug].js": {
+      "maxDuration": 10
     }
-  ]
+  }
 }
