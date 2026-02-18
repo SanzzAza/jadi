@@ -1,8 +1,76 @@
 {
   "version": 2,
+  "name": "captain-sapimu",
+  "alias": ["captain-sapimu"],
+  "regions": ["sin1"],
+  "buildCommand": "npm install",
+  "outputDirectory": ".",
+  "rewrites": [
+    { 
+      "source": "/api/proxy", 
+      "destination": "/api/proxy" 
+    },
+    { 
+      "source": "/api/proxy/(.*)", 
+      "destination": "/api/proxy" 
+    },
+    { 
+      "source": "/(.*)", 
+      "destination": "/index.html" 
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { 
+          "key": "Access-Control-Allow-Origin", 
+          "value": "*" 
+        },
+        { 
+          "key": "Access-Control-Allow-Methods", 
+          "value": "GET, POST, PUT, DELETE, OPTIONS" 
+        },
+        { 
+          "key": "Access-Control-Allow-Headers", 
+          "value": "Authorization, Content-Type, Accept, Origin, User-Agent" 
+        },
+        { 
+          "key": "Access-Control-Max-Age", 
+          "value": "86400" 
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=300"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options", 
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ],
   "functions": {
     "api/proxy.js": {
-      "maxDuration": 30
+      "maxDuration": 30,
+      "memory": 1024,
+      "runtime": "nodejs18.x"
     }
+  },
+  "env": {
+    "NODE_ENV": "production"
   }
 }
