@@ -25,14 +25,36 @@ module.exports = async function handler(req, res) {
       method: req.method,
       headers: {
         'Authorization': req.headers.authorization || '',
-        'Accept': 'application/json'
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': req.headers['accept-language'] || 'en-US,en;q=0.9,id;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36',
+        'Referer': 'https://captain.sapimu.au/',
+        'Origin': 'https://captain.sapimu.au',
+        'X-Requested-With': 'XMLHttpRequest',
       }
     });
 
     var data = await response.text();
+
+    // Return diagnostic info jika error
+    if (!response.ok) {
+      return res.status(response.status).json({
+        proxy_error: true,
+        status: response.status,
+        statusText: response.statusText,
+        url: targetUrl,
+        body: data.substring(0, 500)
+      });
+    }
+
     res.setHeader('Content-Type', 'application/json');
-    return res.status(response.status).send(data);
+    res.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=600');
+    return res.status(200).send(data);
   } catch (e) {
-    return res.status(500).json({ error: e.message, url: targetUrl });
+    return res.status(500).json({ 
+      proxy_error: true,
+      error: e.message, 
+      url: targetUrl 
+    });
   }
 };
