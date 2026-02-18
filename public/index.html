@@ -159,42 +159,36 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 </div>
 
 <script>
-// ============================================
-// PROXY SETUP - Simple query param approach
-// ============================================
-const DIRECT = 'https://captain.sapimu.au';
-const PROXY = '/api/proxy';
-const isLocal = ['localhost','127.0.0.1'].includes(window.location.hostname);
-const TOKEN_DEFAULT = "53d25de32c37b0fcd2b14a9f834050493cc044d5039b5aff3283da73a8ef761b";
-const CACHE_KEY = "sapimu_cache_v6";
-const LANGS=[{c:"id",n:"Indonesian"},{c:"en",n:"English"},{c:"th",n:"Thai"},{c:"vi",n:"Vietnamese"},{c:"pt",n:"Portuguese"},{c:"es",n:"Spanish"},{c:"ja",n:"Japanese"},{c:"ko",n:"Korean"},{c:"zh",n:"Chinese"},{c:"ar",n:"Arabic"},{c:"fr",n:"French"},{c:"de",n:"German"}];
+var DIRECT='https://captain.sapimu.au';
+var PROXY='/api/proxy';
+var isLocal=['localhost','127.0.0.1'].indexOf(window.location.hostname)!==-1;
+var TOKEN_DEFAULT="53d25de32c37b0fcd2b14a9f834050493cc044d5039b5aff3283da73a8ef761b";
+var CACHE_KEY="sapimu_cache_v7";
+var LANGS=[{c:"id",n:"Indonesian"},{c:"en",n:"English"},{c:"th",n:"Thai"},{c:"vi",n:"Vietnamese"},{c:"pt",n:"Portuguese"},{c:"es",n:"Spanish"},{c:"ja",n:"Japanese"},{c:"ko",n:"Korean"},{c:"zh",n:"Chinese"},{c:"ar",n:"Arabic"},{c:"fr",n:"French"},{c:"de",n:"German"}];
 
-// Build fetch URL (proxy on Vercel, direct on localhost)
-function makeUrl(apiPath, queryParams) {
-  if (isLocal) {
-    const qs = Object.entries(queryParams||{}).filter(([,v])=>v).map(([k,v])=>`${k}=${encodeURIComponent(v)}`).join('&');
-    return `${DIRECT}/${apiPath}${qs ? '?' + qs : ''}`;
+function makeUrl(apiPath,queryParams){
+  if(isLocal){
+    var qs=Object.entries(queryParams||{}).filter(function(e){return e[1]}).map(function(e){return e[0]+'='+encodeURIComponent(e[1])}).join('&');
+    return DIRECT+'/'+apiPath+(qs?'?'+qs:'');
   }
-  const p = new URLSearchParams();
-  p.set('path', apiPath);
-  Object.entries(queryParams||{}).forEach(([k,v])=>{ if(v) p.set(k,v); });
-  return `${PROXY}?${p.toString()}`;
+  var p=new URLSearchParams();
+  p.set('path',apiPath);
+  Object.entries(queryParams||{}).forEach(function(e){if(e[1])p.set(e[0],e[1]);});
+  return PROXY+'?'+p.toString();
 }
 
-// Build display URL (always shows direct URL)
-function directUrl(apiPath, queryParams) {
-  const qs = Object.entries(queryParams||{}).filter(([,v])=>v).map(([k,v])=>`${k}=${encodeURIComponent(v)}`).join('&');
-  return `${DIRECT}/${apiPath}${qs ? '?' + qs : ''}`;
+function directUrl(apiPath,queryParams){
+  var qs=Object.entries(queryParams||{}).filter(function(e){return e[1]}).map(function(e){return e[0]+'='+encodeURIComponent(e[1])}).join('&');
+  return DIRECT+'/'+apiPath+(qs?'?'+qs:'');
 }
 
-let cache={ids:{},chapters:{}};
-let failedPlatforms=[];
-const wait=ms=>new Promise(r=>setTimeout(r,ms));
-
-function loadCache(){try{const s=localStorage.getItem(CACHE_KEY);if(s)cache=JSON.parse(s);}catch(e){}}
+var cache={ids:{},chapters:{}};
+var failedPlatforms=[];
+function wait(ms){return new Promise(function(r){setTimeout(r,ms)})}
+function loadCache(){try{var s=localStorage.getItem(CACHE_KEY);if(s)cache=JSON.parse(s);}catch(e){}}
 function saveCache(){try{localStorage.setItem(CACHE_KEY,JSON.stringify(cache));}catch(e){}}
 
-const P={
+var P={
 bilitv:{n:"BiliTV",l:"/api/v1/home",id:"id",t:"title",pa:"dramas",ep:[
 {m:"GET",p:"/api/v1/languages",d:"Languages",ty:"meta"},
 {m:"GET",p:"/api/v1/home",d:"Home",ty:"list"},
@@ -559,12 +553,11 @@ vigloo:{n:"Vigloo",l:"/api/v1/tabs",id:"id",t:"name",pa:"data",ep:[
 ]}
 };
 
-// ============================================
-const getToken=()=>document.getElementById('tokenInput').value||localStorage.getItem('sapimu_token')||'';
-const extractParams=(p)=>(p.match(/:(\w+)/g)||[]).map(m=>m.slice(1));
+var getToken=function(){return document.getElementById('tokenInput').value||localStorage.getItem('sapimu_token')||''};
+var extractParams=function(p){return(p.match(/:(\w+)/g)||[]).map(function(m){return m.slice(1)})};
 
 function saveToken(){
-  const t=document.getElementById('tokenInput').value.trim();
+  var t=document.getElementById('tokenInput').value.trim();
   if(!t)return alert('Enter token!');
   localStorage.setItem('sapimu_token',t);
   document.getElementById('tokenDot').className='token-dot active';
@@ -575,7 +568,7 @@ function saveToken(){
 }
 
 function loadToken(){
-  const s=localStorage.getItem('sapimu_token')||TOKEN_DEFAULT;
+  var s=localStorage.getItem('sapimu_token')||TOKEN_DEFAULT;
   document.getElementById('tokenInput').value=s;
   if(s){
     document.getElementById('tokenDot').className='token-dot active';
@@ -586,116 +579,125 @@ function loadToken(){
 }
 
 // ============================================
-// SEQUENTIAL FETCH
+// SEQUENTIAL FETCH WITH LONG DELAYS
 // ============================================
 async function prefetchAll(){
-  const token=getToken();if(!token)return;
-  const keys=Object.keys(P);
-  const total=keys.length;
-  let done=0,success=0;
+  var token=getToken();if(!token)return;
+  var keys=Object.keys(P);
+  var total=keys.length;
+  var done=0,success=0;
   failedPlatforms=[];
-  
+
   document.getElementById('loadingBar').classList.add('show');
   document.getElementById('prefetchStatus').className='prefetch-status loading';
-  
-  for(const k of keys){
+
+  for(var ki=0;ki<keys.length;ki++){
+    var k=keys[ki];
     done++;
-    document.getElementById('prefetchStatus').textContent=`[${done}/${total}] Loading ${P[k].n}...`;
+    document.getElementById('prefetchStatus').textContent='['+done+'/'+total+'] Loading '+P[k].n+'...';
     document.getElementById('loadingProgress').style.width=Math.round((done/total)*100)+'%';
-    
+
     try{
-      const items=await fetchPlatformIds(k);
+      var items=await fetchPlatformIds(k);
       if(items.length>0){success++;saveCache();}
       else failedPlatforms.push(k);
     }catch(e){failedPlatforms.push(k);}
-    
+
     updateNavStatus(k);
-    await wait(500);
+    await wait(2000);
   }
-  
+
   document.getElementById('loadingBar').classList.remove('show');
   finishPrefetch(success,total);
   populateAllDropdowns();
 }
 
 async function fetchPlatformIds(k){
-  const pl=P[k];if(!pl.l)return[];
-  if(cache.ids[k]?.length)return cache.ids[k];
-  const token=getToken();
-  
-  // Build URL through proxy
-  const url=makeUrl(`${k}${pl.l}`,{});
-  
-  for(let attempt=0;attempt<3;attempt++){
+  var pl=P[k];if(!pl.l)return[];
+  if(cache.ids[k]&&cache.ids[k].length)return cache.ids[k];
+  var token=getToken();
+  var url=makeUrl(k+pl.l,{});
+
+  for(var attempt=0;attempt<3;attempt++){
     try{
-      const r=await fetch(url,{headers:{'Authorization':`Bearer ${token}`}});
-      if(!r.ok){if(attempt<2){await wait(1000*(attempt+1));continue;}return[];}
-      const j=await r.json();
-      
-      let d=j;
-      if(pl.pa)for(const x of pl.pa.split('.'))d=d?.[x];
-      if(!Array.isArray(d))d=d?.list||d?.dramas||d?.items||d?.hall_list||Object.values(d||{})[0]||[];
+      var r=await fetch(url,{headers:{'Authorization':'Bearer '+token}});
+      if(!r.ok){
+        if(attempt<2){await wait(3000*(attempt+1));continue;}
+        return[];
+      }
+      var j=await r.json();
+      var d=j;
+      if(pl.pa){var parts=pl.pa.split('.');for(var pi=0;pi<parts.length;pi++){d=d?d[parts[pi]]:undefined;}}
+      if(!Array.isArray(d)){
+        if(d&&d.list)d=d.list;
+        else if(d&&d.dramas)d=d.dramas;
+        else if(d&&d.items)d=d.items;
+        else if(d&&d.hall_list)d=d.hall_list;
+        else if(d&&typeof d==='object'){var vals=Object.values(d);d=Array.isArray(vals[0])?vals[0]:[];}
+        else d=[];
+      }
       if(!Array.isArray(d))d=[];
-      
-      const items=d.slice(0,50).map(i=>({
+
+      var items=d.slice(0,50).map(function(i){return{
         id:String(i[pl.id]||i.id||i.book_id||i.bookId||i.code||i.playlet_id||i.dcup||''),
         t:(i[pl.t]||i.title||i.name||i.bookName||'Unknown').substring(0,40)
-      })).filter(x=>x.id);
-      
+      }}).filter(function(x){return x.id});
+
       cache.ids[k]=items;return items;
     }catch(e){
-      if(attempt<2)await wait(2000*(attempt+1));
+      if(attempt<2)await wait(3000*(attempt+1));
     }
   }
   return[];
 }
 
 function updateNavStatus(k){
-  const nav=document.querySelector(`.nav-item[data-key="${k}"]`);if(!nav)return;
-  nav.querySelector('.nav-status')?.remove();
-  const span=document.createElement('span');span.className='nav-status';
-  if(cache.ids[k]?.length){span.textContent='✓'+cache.ids[k].length;span.style.color='var(--green)';}
+  var nav=document.querySelector('.nav-item[data-key="'+k+'"]');if(!nav)return;
+  var old=nav.querySelector('.nav-status');if(old)old.remove();
+  var span=document.createElement('span');span.className='nav-status';
+  if(cache.ids[k]&&cache.ids[k].length){span.textContent='✓'+cache.ids[k].length;span.style.color='var(--green)';}
   else{span.textContent='✗';span.style.color='var(--red)';}
   nav.appendChild(span);
 }
 
 function finishPrefetch(success,total){
-  const totalIds=Object.values(cache.ids).reduce((a,b)=>a+b.length,0);
+  var totalIds=0;Object.values(cache.ids).forEach(function(a){totalIds+=a.length});
   if(!failedPlatforms.length){
     document.getElementById('prefetchStatus').className='prefetch-status done';
-    document.getElementById('prefetchStatus').textContent=`✓ All ${total} loaded! (${totalIds} IDs)`;
+    document.getElementById('prefetchStatus').textContent='✓ All '+total+' loaded! ('+totalIds+' IDs)';
   }else{
     document.getElementById('prefetchStatus').className='prefetch-status error';
-    document.getElementById('prefetchStatus').innerHTML=`⚠ ${success}/${total} loaded (${totalIds} IDs). <button onclick="retryFailed()" style="background:var(--yellow);color:#000;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-weight:600">🔄 Retry ${failedPlatforms.length}</button><br><small style="color:var(--text3)">Failed: ${failedPlatforms.map(k=>P[k].n).join(', ')}</small>`;
+    document.getElementById('prefetchStatus').innerHTML='⚠ '+success+'/'+total+' loaded ('+totalIds+' IDs). <button onclick="retryFailed()" style="background:var(--yellow);color:#000;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-weight:600">🔄 Retry '+failedPlatforms.length+'</button><br><small style="color:var(--text3)">Failed: '+failedPlatforms.map(function(k){return P[k].n}).join(', ')+'</small>';
   }
 }
 
 async function retryFailed(){
   if(!failedPlatforms.length)return;
-  const toRetry=[...failedPlatforms];failedPlatforms=[];let success=0;
+  var toRetry=failedPlatforms.slice();failedPlatforms=[];var success=0;
   document.getElementById('prefetchStatus').className='prefetch-status loading';
-  for(let i=0;i<toRetry.length;i++){
-    const k=toRetry[i];
-    document.getElementById('prefetchStatus').textContent=`Retrying [${i+1}/${toRetry.length}] ${P[k].n}...`;
+  for(var i=0;i<toRetry.length;i++){
+    var k=toRetry[i];
+    document.getElementById('prefetchStatus').textContent='Retrying ['+(i+1)+'/'+toRetry.length+'] '+P[k].n+'...';
     delete cache.ids[k];
-    try{const items=await fetchPlatformIds(k);if(items.length>0){success++;saveCache();}else failedPlatforms.push(k);}
+    try{var items=await fetchPlatformIds(k);if(items.length>0){success++;saveCache();}else failedPlatforms.push(k);}
     catch(e){failedPlatforms.push(k);}
-    updateNavStatus(k);await wait(1500);
+    updateNavStatus(k);
+    await wait(3000);
   }
-  const loaded=Object.keys(cache.ids).filter(k=>cache.ids[k]?.length).length;
+  var loaded=Object.keys(cache.ids).filter(function(k){return cache.ids[k]&&cache.ids[k].length}).length;
   finishPrefetch(loaded,Object.keys(P).length);populateAllDropdowns();
 }
 
 function populateAllDropdowns(){
-  Object.keys(P).forEach(k=>{
-    const items=cache.ids[k]||[];
-    P[k].ep.forEach((ep,i)=>{
-      extractParams(ep.p).forEach(pr=>{
-        if(ep.pr?.[pr]===1){
-          const sel=document.getElementById(`sel-${k}-${i}-${pr}`);
+  Object.keys(P).forEach(function(k){
+    var items=cache.ids[k]||[];
+    P[k].ep.forEach(function(ep,i){
+      extractParams(ep.p).forEach(function(pr){
+        if(ep.pr&&ep.pr[pr]===1){
+          var sel=document.getElementById('sel-'+k+'-'+i+'-'+pr);
           if(sel){
             if(items.length>0){
-              sel.innerHTML='<option value="">-- Select ('+items.length+') --</option>'+items.map(d=>`<option value="${d.id}">${d.id} - ${d.t}</option>`).join('');
+              sel.innerHTML='<option value="">-- Select ('+items.length+') --</option>'+items.map(function(d){return'<option value="'+d.id+'">'+d.id+' - '+d.t+'</option>'}).join('');
               sel.classList.add('loaded');sel.classList.remove('error');
             }else{sel.innerHTML='<option value="">-- No data --</option>';sel.classList.add('error');}
           }
@@ -709,100 +711,83 @@ function populateAllDropdowns(){
 // URL BUILDERS
 // ============================================
 function getApiPath(k,i){
-  const ep=P[k].ep[i];let p=ep.p;
-  extractParams(p).forEach(pr=>{
-    const sel=document.getElementById(`sel-${k}-${i}-${pr}`);
-    const inp=document.getElementById(`inp-${k}-${i}-${pr}`);
-    const v=sel?.value||inp?.value?.trim()||'';
-    if(v)p=p.replace(`:${pr}`,encodeURIComponent(v));
+  var ep=P[k].ep[i];var p=ep.p;
+  extractParams(p).forEach(function(pr){
+    var sel=document.getElementById('sel-'+k+'-'+i+'-'+pr);
+    var inp=document.getElementById('inp-'+k+'-'+i+'-'+pr);
+    var v=(sel&&sel.value)||(inp&&inp.value&&inp.value.trim())||'';
+    if(v)p=p.replace(':'+pr,encodeURIComponent(v));
   });
   return p;
 }
 
 function getQueryParams(k,i){
-  const ep=P[k].ep[i];const params={};
+  var ep=P[k].ep[i];var params={};
   if(ep.ty==='list'){
-    const page=document.getElementById(`q-${k}-${i}-page`)?.value;
-    const limit=document.getElementById(`q-${k}-${i}-limit`)?.value;
-    const lang=document.getElementById(`q-${k}-${i}-lang`)?.value;
-    if(page)params.page=page;if(limit)params.limit=limit;if(lang)params.lang=lang;
+    var page=document.getElementById('q-'+k+'-'+i+'-page');if(page&&page.value)params.page=page.value;
+    var limit=document.getElementById('q-'+k+'-'+i+'-limit');if(limit&&limit.value)params.limit=limit.value;
+    var lang=document.getElementById('q-'+k+'-'+i+'-lang');if(lang&&lang.value)params.lang=lang.value;
   }
   if(ep.q){
-    Object.keys(ep.q).forEach(qk=>{
-      if(['page','limit','lang'].includes(qk))return;
-      const v=document.getElementById(`q-${k}-${i}-${qk}`)?.value?.trim();
-      if(v)params[qk]=v;
+    Object.keys(ep.q).forEach(function(qk){
+      if(['page','limit','lang'].indexOf(qk)!==-1)return;
+      var el=document.getElementById('q-'+k+'-'+i+'-'+qk);
+      if(el&&el.value&&el.value.trim())params[qk]=el.value.trim();
     });
   }
   return params;
 }
 
-// For fetching (uses proxy on Vercel)
-function buildFetchUrl(k,i){
-  return makeUrl(`${k}${getApiPath(k,i)}`, getQueryParams(k,i));
-}
-
-// For display (always shows real URL)
-function buildDisplayUrl(k,i){
-  return directUrl(`${k}${getApiPath(k,i)}`, getQueryParams(k,i));
-}
-
-function updateUrl(k,i){
-  const el=document.getElementById(`url-${k}-${i}`);
-  if(el)el.value=buildDisplayUrl(k,i);
-}
-
-function changePage(k,i,delta){
-  const inp=document.getElementById(`q-${k}-${i}-page`);if(!inp)return;
-  let v=parseInt(inp.value)||1;v+=delta;if(v<1)v=1;inp.value=v;updateUrl(k,i);
-}
+function buildFetchUrl(k,i){return makeUrl(k+getApiPath(k,i),getQueryParams(k,i))}
+function buildDisplayUrl(k,i){return directUrl(k+getApiPath(k,i),getQueryParams(k,i))}
+function updateUrl(k,i){var el=document.getElementById('url-'+k+'-'+i);if(el)el.value=buildDisplayUrl(k,i);}
+function changePage(k,i,delta){var inp=document.getElementById('q-'+k+'-'+i+'-page');if(!inp)return;var v=parseInt(inp.value)||1;v+=delta;if(v<1)v=1;inp.value=v;updateUrl(k,i);}
 
 // ============================================
 // RENDER
 // ============================================
-let totalEp=0;Object.values(P).forEach(p=>totalEp+=p.ep.length);
+var totalEp=0;Object.values(P).forEach(function(p){totalEp+=p.ep.length});
 
 function renderSidebar(){
-  const nav=document.getElementById('sidebarNav');
-  const sorted=Object.entries(P).sort((a,b)=>a[1].n.localeCompare(b[1].n));
-  nav.innerHTML=sorted.map(([k,p])=>`<div class="nav-item" data-key="${k}" onclick="scrollTo('${k}')"><div class="nav-icon">${p.n.slice(0,2).toUpperCase()}</div><div class="nav-name">${p.n}</div><div class="nav-count">${p.ep.length}</div></div>`).join('');
+  var nav=document.getElementById('sidebarNav');
+  var sorted=Object.entries(P).sort(function(a,b){return a[1].n.localeCompare(b[1].n)});
+  nav.innerHTML=sorted.map(function(e){var k=e[0],p=e[1];return'<div class="nav-item" data-key="'+k+'" onclick="scrollTo(\''+k+'\')"><div class="nav-icon">'+p.n.slice(0,2).toUpperCase()+'</div><div class="nav-name">'+p.n+'</div><div class="nav-count">'+p.ep.length+'</div></div>'}).join('');
 }
 
-function hl(p){return p.replace(/:(\w+)/g,'<span class="param">:$1</span>');}
+function hl(p){return p.replace(/:(\w+)/g,'<span class="param">:$1</span>')}
 
 function renderContent(){
-  const content=document.getElementById('content');
-  const sorted=Object.entries(P).sort((a,b)=>a[1].n.localeCompare(b[1].n));
-  
-  let html=sorted.map(([k,pl])=>{
-    const eps=pl.ep.map((ep,i)=>{
-      const prs=extractParams(ep.p);const isList=ep.ty==='list';
-      let paramHtml='<div class="param-grid">';
+  var content=document.getElementById('content');
+  var sorted=Object.entries(P).sort(function(a,b){return a[1].n.localeCompare(b[1].n)});
+  var html=sorted.map(function(e){
+    var k=e[0],pl=e[1];
+    var eps=pl.ep.map(function(ep,i){
+      var prs=extractParams(ep.p);var isList=ep.ty==='list';
+      var paramHtml='<div class="param-grid">';
       if(isList){
-        paramHtml+=`<div class="param-item"><label>page <span class="opt">(opt)</span></label><div class="page-ctrl"><button onclick="changePage('${k}',${i},-1)">−</button><input type="number" id="q-${k}-${i}-page" value="1" min="1" oninput="updateUrl('${k}',${i})"><button onclick="changePage('${k}',${i},1)">+</button></div></div><div class="param-item"><label>limit <span class="opt">(opt)</span></label><input type="number" id="q-${k}-${i}-limit" value="20" oninput="updateUrl('${k}',${i})"></div><div class="param-item"><label>lang <span class="opt">(opt)</span></label><select id="q-${k}-${i}-lang" onchange="updateUrl('${k}',${i})"><option value="">Auto</option>${LANGS.map(l=>`<option value="${l.c}"${l.c==='id'?' selected':''}>${l.n}</option>`).join('')}</select></div>`;
+        paramHtml+='<div class="param-item"><label>page <span class="opt">(opt)</span></label><div class="page-ctrl"><button onclick="changePage(\''+k+'\','+i+',-1)">−</button><input type="number" id="q-'+k+'-'+i+'-page" value="1" min="1" oninput="updateUrl(\''+k+'\','+i+')"><button onclick="changePage(\''+k+'\','+i+',1)">+</button></div></div><div class="param-item"><label>limit <span class="opt">(opt)</span></label><input type="number" id="q-'+k+'-'+i+'-limit" value="20" oninput="updateUrl(\''+k+'\','+i+')"></div><div class="param-item"><label>lang <span class="opt">(opt)</span></label><select id="q-'+k+'-'+i+'-lang" onchange="updateUrl(\''+k+'\','+i+')"><option value="">Auto</option>'+LANGS.map(function(l){return'<option value="'+l.c+'"'+(l.c==='id'?' selected':'')+'>'+l.n+'</option>'}).join('')+'</select></div>';
       }
       if(prs.length>0){
-        prs.forEach(pr=>{
-          if(ep.pr?.[pr]===0){
-            paramHtml+=`<div class="param-item"><label>${pr} <span class="req">*</span></label><input type="text" id="inp-${k}-${i}-${pr}" placeholder="${pr}" oninput="updateUrl('${k}',${i})" value="${pr==='page'?'1':''}"></div>`;
+        prs.forEach(function(pr){
+          if(ep.pr&&ep.pr[pr]===0){
+            paramHtml+='<div class="param-item"><label>'+pr+' <span class="req">*</span></label><input type="text" id="inp-'+k+'-'+i+'-'+pr+'" placeholder="'+pr+'" oninput="updateUrl(\''+k+'\','+i+')" value="'+(pr==='page'?'1':'')+'"></div>';
           }else{
-            paramHtml+=`<div class="param-item"><label>${pr} <span class="req">*</span></label><select id="sel-${k}-${i}-${pr}" onchange="updateUrl('${k}',${i})"><option value="">Loading...</option></select><input type="text" id="inp-${k}-${i}-${pr}" placeholder="Or type ID" oninput="updateUrl('${k}',${i})" style="margin-top:4px;font-size:10px"></div>`;
+            paramHtml+='<div class="param-item"><label>'+pr+' <span class="req">*</span></label><select id="sel-'+k+'-'+i+'-'+pr+'" onchange="updateUrl(\''+k+'\','+i+')"><option value="">Loading...</option></select><input type="text" id="inp-'+k+'-'+i+'-'+pr+'" placeholder="Or type ID" oninput="updateUrl(\''+k+'\','+i+')" style="margin-top:4px;font-size:10px"></div>';
           }
         });
       }
       if(ep.q){
-        Object.entries(ep.q).forEach(([qk,qd])=>{
-          if(isList&&['page','limit','lang'].includes(qk))return;
-          paramHtml+=`<div class="param-item"><label>${qk} <span class="opt">(query)</span></label><input type="text" id="q-${k}-${i}-${qk}" placeholder="${qd}" oninput="updateUrl('${k}',${i})"></div>`;
+        Object.entries(ep.q).forEach(function(qe){
+          var qk=qe[0],qd=qe[1];
+          if(isList&&['page','limit','lang'].indexOf(qk)!==-1)return;
+          paramHtml+='<div class="param-item"><label>'+qk+' <span class="opt">(query)</span></label><input type="text" id="q-'+k+'-'+i+'-'+qk+'" placeholder="'+qd+'" oninput="updateUrl(\''+k+'\','+i+')"></div>';
         });
       }
       paramHtml+='</div>';
-
-      const defaultDisplay=directUrl(`${k}${ep.p}`,{});
-
-      return `<div class="endpoint-card" id="${k}-${i}"><div class="endpoint-header" onclick="toggle('${k}-${i}')"><span class="method-badge method-${ep.m}">${ep.m}</span><span class="endpoint-path">${hl(ep.p)}</span><span class="endpoint-desc">${ep.d}</span><span class="endpoint-toggle">▼</span></div><div class="endpoint-detail"><div class="detail-section"><h4>Parameters</h4>${paramHtml}</div><div class="try-section"><div class="try-url"><input type="text" value="${defaultDisplay}" id="url-${k}-${i}" readonly><button class="btn-copy" onclick="copy('url-${k}-${i}')">📋</button><button class="btn-curl" onclick="copyCurl('${k}',${i})">cURL</button><button class="btn-send" onclick="send('${k}',${i})">▶ Send</button></div><div class="response-box" id="resp-${k}-${i}"><div class="response-header"><span class="response-status" id="rs-${k}-${i}"></span><div class="response-actions"><span id="rz-${k}-${i}"></span><button onclick="copy('rb-${k}-${i}')">📋</button><button onclick="document.getElementById('resp-${k}-${i}').style.display='none'">✕</button></div></div><pre class="response-body" id="rb-${k}-${i}"></pre></div></div></div></div>`;
+      var defUrl=directUrl(k+ep.p,{});
+      return '<div class="endpoint-card" id="'+k+'-'+i+'"><div class="endpoint-header" onclick="toggle(\''+k+'-'+i+'\')"><span class="method-badge method-'+ep.m+'">'+ep.m+'</span><span class="endpoint-path">'+hl(ep.p)+'</span><span class="endpoint-desc">'+ep.d+'</span><span class="endpoint-toggle">▼</span></div><div class="endpoint-detail"><div class="detail-section"><h4>Parameters</h4>'+paramHtml+'</div><div class="try-section"><div class="try-url"><input type="text" value="'+defUrl+'" id="url-'+k+'-'+i+'" readonly><button class="btn-copy" onclick="copy(\'url-'+k+'-'+i+'\')">📋</button><button class="btn-curl" onclick="copyCurl(\''+k+'\','+i+')">cURL</button><button class="btn-send" onclick="send(\''+k+'\','+i+')">▶ Send</button></div><div class="response-box" id="resp-'+k+'-'+i+'"><div class="response-header"><span class="response-status" id="rs-'+k+'-'+i+'"></span><div class="response-actions"><span id="rz-'+k+'-'+i+'"></span><button onclick="copy(\'rb-'+k+'-'+i+'\')">📋</button><button onclick="document.getElementById(\'resp-'+k+'-'+i+'\').style.display=\'none\'">✕</button></div></div><pre class="response-body" id="rb-'+k+'-'+i+'"></pre></div></div></div></div>';
     }).join('');
-    return `<div class="platform-section" id="p-${k}"><div class="platform-header"><div class="platform-icon">${pl.n.slice(0,2).toUpperCase()}</div><div><h2>${pl.n}</h2><div class="platform-meta">Base: <code>/${k}</code> · ${pl.ep.length} endpoints</div></div></div>${eps}</div>`;
+    return '<div class="platform-section" id="p-'+k+'"><div class="platform-header"><div class="platform-icon">'+pl.n.slice(0,2).toUpperCase()+'</div><div><h2>'+pl.n+'</h2><div class="platform-meta">Base: <code>/'+k+'</code> · '+pl.ep.length+' endpoints</div></div></div>'+eps+'</div>';
   }).join('');
   content.innerHTML=html;
 }
@@ -810,33 +795,31 @@ function renderContent(){
 // ============================================
 // INTERACTIONS
 // ============================================
-const toggle=(id)=>document.getElementById(id).classList.toggle('open');
-const scrollTo=(k)=>{document.getElementById('p-'+k)?.scrollIntoView({behavior:'smooth'});document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.querySelector(`.nav-item[data-key="${k}"]`)?.classList.add('active');if(window.innerWidth<768)toggleSidebar();};
-const filterPlatforms=()=>{const q=document.getElementById('searchInput').value.toLowerCase();document.querySelectorAll('.nav-item').forEach(n=>{n.style.display=n.querySelector('.nav-name').textContent.toLowerCase().includes(q)?'flex':'none';});document.querySelectorAll('.platform-section').forEach(s=>{s.style.display=s.querySelector('h2').textContent.toLowerCase().includes(q)?'block':'none';});};
-const toggleSidebar=()=>{document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show');};
-const copy=(id)=>navigator.clipboard.writeText(document.getElementById(id).value||document.getElementById(id).textContent);
-const copyCurl=(k,i)=>{navigator.clipboard.writeText(`curl "${buildDisplayUrl(k,i)}" -H "Authorization: Bearer ${getToken()}"`);alert('Copied!');};
+function toggle(id){document.getElementById(id).classList.toggle('open')}
+function scrollTo(k){document.getElementById('p-'+k).scrollIntoView({behavior:'smooth'});document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active')});var el=document.querySelector('.nav-item[data-key="'+k+'"]');if(el)el.classList.add('active');if(window.innerWidth<768)toggleSidebar();}
+function filterPlatforms(){var q=document.getElementById('searchInput').value.toLowerCase();document.querySelectorAll('.nav-item').forEach(function(n){n.style.display=n.querySelector('.nav-name').textContent.toLowerCase().indexOf(q)!==-1?'flex':'none'});document.querySelectorAll('.platform-section').forEach(function(s){s.style.display=s.querySelector('h2').textContent.toLowerCase().indexOf(q)!==-1?'block':'none'});}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show')}
+function copy(id){var el=document.getElementById(id);navigator.clipboard.writeText(el.value||el.textContent)}
+function copyCurl(k,i){navigator.clipboard.writeText('curl "'+buildDisplayUrl(k,i)+'" -H "Authorization: Bearer '+getToken()+'"');alert('Copied!')}
 
 async function send(k,i){
-  const t=getToken();if(!t)return alert('Set token first!');
-  const url=buildFetchUrl(k,i); // Uses proxy on Vercel!
-  const ep=P[k].ep[i];
-  const box=document.getElementById(`resp-${k}-${i}`);
-  const st=document.getElementById(`rs-${k}-${i}`);
-  const sz=document.getElementById(`rz-${k}-${i}`);
-  const bd=document.getElementById(`rb-${k}-${i}`);
-  
+  var t=getToken();if(!t)return alert('Set token first!');
+  var url=buildFetchUrl(k,i);
+  var ep=P[k].ep[i];
+  var box=document.getElementById('resp-'+k+'-'+i);
+  var st=document.getElementById('rs-'+k+'-'+i);
+  var sz=document.getElementById('rz-'+k+'-'+i);
+  var bd=document.getElementById('rb-'+k+'-'+i);
   box.style.display='block';st.textContent='⏳ Loading...';st.className='response-status loading';bd.textContent='';
-  
   try{
-    const r=await fetch(url,{method:ep.m,headers:{Authorization:`Bearer ${t}`}});
-    const txt=await r.text();
-    st.textContent=`${r.status} ${r.statusText}`;st.className=`response-status ${r.ok?'ok':'err'}`;
-    sz.textContent=`${(txt.length/1024).toFixed(1)}KB`;
-    try{bd.textContent=JSON.stringify(JSON.parse(txt),null,2);}catch{bd.textContent=txt;}
+    var r=await fetch(url,{method:ep.m,headers:{Authorization:'Bearer '+t}});
+    var txt=await r.text();
+    st.textContent=r.status+' '+r.statusText;st.className='response-status '+(r.ok?'ok':'err');
+    sz.textContent=(txt.length/1024).toFixed(1)+'KB';
+    try{bd.textContent=JSON.stringify(JSON.parse(txt),null,2)}catch(e2){bd.textContent=txt}
   }catch(e){
     st.textContent='❌ Error';st.className='response-status err';
-    bd.textContent=`Error: ${e.message}`;
+    bd.textContent='Error: '+e.message;
   }
 }
 
@@ -851,44 +834,37 @@ document.getElementById('badgeEndpoints').textContent=totalEp;
 loadCache();renderSidebar();renderContent();loadToken();
 
 async function init(){
-  // Test proxy first (Vercel only)
   if(!isLocal){
     try{
-      console.log('Testing proxy at /api/proxy ...');
-      const r=await fetch('/api/proxy');
-      const j=await r.json();
-      console.log('Proxy response:',j);
+      var r=await fetch('/api/proxy');
+      var j=await r.json();
       if(j.status!=='ok'){
         document.getElementById('prefetchStatus').className='prefetch-status error';
         document.getElementById('prefetchStatus').textContent='❌ Proxy error: '+JSON.stringify(j);
         return;
       }
-      document.getElementById('prefetchStatus').textContent='✓ Proxy connected! Starting load...';
     }catch(e){
-      console.error('Proxy test failed:',e);
       document.getElementById('prefetchStatus').className='prefetch-status error';
-      document.getElementById('prefetchStatus').textContent='❌ Proxy not found at /api/proxy - '+e.message;
+      document.getElementById('prefetchStatus').textContent='❌ Proxy not found: '+e.message;
       return;
     }
   }
-  
-  const cached=Object.keys(cache.ids).filter(k=>cache.ids[k]?.length).length;
+  var cached=Object.keys(cache.ids).filter(function(k){return cache.ids[k]&&cache.ids[k].length}).length;
   if(cached>0){
     populateAllDropdowns();
-    Object.keys(cache.ids).forEach(k=>updateNavStatus(k));
-    const totalIds=Object.values(cache.ids).reduce((a,b)=>a+b.length,0);
+    Object.keys(cache.ids).forEach(function(k){updateNavStatus(k)});
+    var totalIds=0;Object.values(cache.ids).forEach(function(a){totalIds+=a.length});
     if(cached>=Object.keys(P).length){
       document.getElementById('prefetchStatus').className='prefetch-status done';
-      document.getElementById('prefetchStatus').textContent=`✓ Cache loaded! (${totalIds} IDs, ${cached} platforms)`;
+      document.getElementById('prefetchStatus').textContent='✓ Cache loaded! ('+totalIds+' IDs, '+cached+' platforms)';
     }else{
       document.getElementById('prefetchStatus').className='prefetch-status done';
-      document.getElementById('prefetchStatus').innerHTML=`✓ Cache: ${cached}/${Object.keys(P).length} (${totalIds} IDs). <button onclick="prefetchAll()" style="background:var(--accent);color:#fff;border:none;padding:4px 12px;border-radius:4px;cursor:pointer">Load remaining</button>`;
+      document.getElementById('prefetchStatus').innerHTML='✓ Cache: '+cached+'/'+Object.keys(P).length+' ('+totalIds+' IDs). <button onclick="prefetchAll()" style="background:var(--accent);color:#fff;border:none;padding:4px 12px;border-radius:4px;cursor:pointer">Load remaining</button>';
     }
   }else if(getToken()){
     setTimeout(prefetchAll,300);
   }
 }
-
 init();
 </script>
 </body>
