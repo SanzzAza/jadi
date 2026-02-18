@@ -1,43 +1,68 @@
-export default async function handler(req, res) {
-  // CORS preflight
-  if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
-    return res.status(200).end();
+export const config = {
+  runtime: 'edge',
+};
+
+export default async function handler(request) {
+  const url = new URL(request.url);
+  
+  // Health check
+  if (url.pathname === '/api' || url.pathname === '/api/') {
+    return new Response(JSON.stringify({ status: 'ok', message: 'Proxy is working!' }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
-  try {
-    // Extract path & query
-    const { path, ...query } = req.query;
-    const targetPath = Array.isArray(path) ? path.join('/') : path || '';
-
-    // Build target URL
-    const targetUrl = new URL(`https://captain.sapimu.au/${targetPath}`);
-    Object.entries(query).forEach(([k, v]) => {
-      targetUrl.searchParams.set(k, v);
+  // Extract path after /api/
+  const pathAfterApi = url.pathname.replace(/^\/api\//, '');
+  
+  if (!pathAfterApi) {
+    return new Response(JSON.stringify({ error: 'No path provided' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
     });
+  }
 
+  // Build target URL
+  const targetUrl = new URL(`https://captain.sapimu.au/${pathAfterApi}`);
+  
+  // Copy query params
+  url.searchParams.forEach((value, key) => {
+    targetUrl.searchParams.set(key, value);
+  });
+
+  try {
     // Forward request
-    const headers = {};
-    if (req.headers.authorization) {
-      headers['Authorization'] = req.headers.authorization;
-    }
-
     const response = await fetch(targetUrl.toString(), {
-      method: req.method,
-      headers
+      method: request.method,
+      headers: {
+        'Authorization': request.headers.get('Authorization') || '',
+        'Content-Type': 'application/json',
+      },
     });
 
     const data = await response.text();
 
-    // Response with CORS
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Content-Type', response.headers.get('content-type') || 'application/json');
-    res.status(response.status).send(data);
+    // Return with CORS headers
+    return new Response(data, {
+      status: response.status,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+      },
+    });
 
   } catch (error) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.status(500).json({ error: error.message });
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      targetUrl: targetUrl.toString()
+    }), {
+      status: 500,
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
   }
 }
