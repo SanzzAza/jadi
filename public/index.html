@@ -1,169 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Captain Sapimu - API Documentation</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0a0f1a;--bg2:#111827;--bg3:#1a2332;--border:#1e293b;--accent:#3b82f6;--accent2:#60a5fa;--green:#10b981;--yellow:#f59e0b;--red:#ef4444;--purple:#8b5cf6;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--sidebar-w:280px}
-body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
-.sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;z-index:100;transition:transform .3s}
-.sidebar-header{padding:20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:10}
-.sidebar-header h1{font-size:18px;background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
-.sidebar-header p{font-size:11px;color:var(--text3)}
-.sidebar-search{padding:12px 16px;border-bottom:1px solid var(--border);position:sticky;top:80px;background:var(--bg2);z-index:10}
-.sidebar-search input{width:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none}
-.sidebar-search input:focus{border-color:var(--accent)}
-.sidebar-search input::placeholder{color:var(--text3)}
-.sidebar-stats{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px}
-.stat-badge{flex:1;text-align:center;padding:6px;background:var(--bg3);border-radius:6px}
-.stat-badge .num{font-size:16px;font-weight:700;color:var(--accent2)}
-.stat-badge .label{font-size:9px;color:var(--text3);text-transform:uppercase}
-.sidebar-nav{padding:8px 0}
-.nav-item{display:flex;align-items:center;padding:8px 16px;cursor:pointer;transition:all .15s;border-left:3px solid transparent;gap:10px}
-.nav-item:hover{background:var(--bg3)}
-.nav-item.active{background:rgba(59,130,246,.1);border-left-color:var(--accent)}
-.nav-item .nav-icon{width:28px;height:28px;border-radius:6px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--accent2)}
-.nav-item .nav-name{font-size:13px;font-weight:500;flex:1}
-.nav-item .nav-count{font-size:11px;color:var(--text3);background:var(--bg);padding:2px 6px;border-radius:10px}
-.nav-item .nav-status{font-size:9px;margin-left:4px}
-.main{margin-left:var(--sidebar-w);min-height:100vh}
-.hero{padding:60px 40px 40px;background:linear-gradient(180deg,rgba(59,130,246,.08) 0%,transparent 100%);border-bottom:1px solid var(--border)}
-.hero h1{font-size:36px;font-weight:800;margin-bottom:12px}
-.hero h1 span{background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero p{color:var(--text2);font-size:16px;max-width:600px;margin-bottom:24px}
-.hero-badges{display:flex;gap:12px;flex-wrap:wrap}
-.hero-badge{padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text2)}
-.hero-badge strong{color:var(--accent2)}
-.loading-bar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:3px;background:var(--bg3);z-index:200;display:none}
-.loading-bar.show{display:block}
-.loading-bar .progress{height:100%;background:linear-gradient(90deg,var(--accent),var(--purple));transition:width .3s;width:0}
-.auth-section{padding:24px 40px;background:var(--bg2);border-bottom:1px solid var(--border)}
-.auth-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px 20px;max-width:700px}
-.auth-box h3{font-size:14px;color:var(--yellow);margin-bottom:8px}
-.token-row{display:flex;gap:8px;margin-bottom:6px}
-.token-row input{flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-family:'Fira Code',monospace;font-size:12px;color:var(--green);outline:none}
-.token-row button{padding:8px 14px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;background:var(--accent);color:#fff}
-.token-status{font-size:11px;display:flex;align-items:center;gap:6px}
-.token-dot{width:8px;height:8px;border-radius:50%}
-.token-dot.active{background:var(--green)}
-.token-dot.inactive{background:var(--red)}
-.prefetch-status{margin-top:10px;padding:8px 12px;background:var(--bg);border-radius:6px;font-size:11px;color:var(--text3)}
-.prefetch-status.loading{color:var(--yellow)}
-.prefetch-status.done{color:var(--green)}
-.prefetch-status.error{color:var(--red)}
-.content{padding:30px 40px}
-.platform-section{margin-bottom:50px;scroll-margin-top:20px}
-.platform-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
-.platform-icon{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff}
-.platform-header h2{font-size:24px;font-weight:700}
-.platform-header .platform-meta{font-size:12px;color:var(--text3)}
-.platform-header .platform-meta code{background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--accent2)}
-.endpoint-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden;transition:border-color .2s}
-.endpoint-card:hover{border-color:var(--accent)}
-.endpoint-header{display:flex;align-items:center;padding:12px 16px;gap:12px;cursor:pointer;user-select:none}
-.method-badge{padding:4px 10px;border-radius:4px;font-size:11px;font-weight:700;font-family:monospace;min-width:50px;text-align:center}
-.method-GET{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3)}
-.method-POST{background:rgba(59,130,246,.15);color:var(--accent2);border:1px solid rgba(59,130,246,.3)}
-.endpoint-path{font-family:'Fira Code',monospace;font-size:13px;color:var(--text);flex:1}
-.endpoint-path .param{color:var(--yellow)}
-.endpoint-desc{font-size:12px;color:var(--text3);max-width:300px;text-align:right}
-.endpoint-toggle{color:var(--text3);font-size:12px;transition:transform .2s}
-.endpoint-card.open .endpoint-toggle{transform:rotate(180deg)}
-.endpoint-detail{display:none;padding:0 16px 16px;border-top:1px solid var(--border)}
-.endpoint-card.open .endpoint-detail{display:block}
-.detail-section{margin-top:12px}
-.detail-section h4{font-size:11px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
-.param-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;padding:12px;background:var(--bg);border-radius:6px;border:1px solid var(--border)}
-.param-item{display:flex;flex-direction:column;gap:4px}
-.param-item label{font-size:10px;color:var(--yellow);font-weight:600;text-transform:uppercase}
-.param-item label .req{color:var(--red)}
-.param-item label .opt{color:var(--text3);font-weight:400}
-.param-item input,.param-item select{padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:monospace;font-size:12px;outline:none;width:100%}
-.param-item input:focus,.param-item select:focus{border-color:var(--yellow)}
-.param-item select{cursor:pointer}
-.param-item select.loaded{border-color:var(--green)}
-.param-item select.error{border-color:var(--red)}
-.page-ctrl{display:flex;align-items:center;gap:4px}
-.page-ctrl input{width:50px;text-align:center}
-.page-ctrl button{width:26px;height:26px;border:1px solid var(--border);background:var(--bg3);color:var(--text);border-radius:4px;cursor:pointer;font-size:14px}
-.page-ctrl button:hover{background:var(--border)}
-.try-section{margin-top:12px;padding:12px;background:var(--bg);border-radius:6px;border:1px solid var(--border)}
-.try-url{display:flex;gap:8px}
-.try-url input{flex:1;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:monospace;font-size:12px;outline:none}
-.try-url button{padding:8px 14px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600}
-.btn-send{background:var(--accent);color:#fff}
-.btn-send:hover{background:var(--accent2)}
-.btn-copy{background:var(--bg3);color:var(--text2);border:1px solid var(--border)!important}
-.btn-curl{background:var(--bg3);color:var(--yellow);border:1px solid rgba(245,158,11,.3)!important}
-.response-box{margin-top:10px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;overflow:hidden;display:none}
-.response-header{display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg3);border-bottom:1px solid var(--border);font-size:11px;align-items:center}
-.response-status{font-weight:700}
-.response-status.ok{color:var(--green)}
-.response-status.err{color:var(--red)}
-.response-status.loading{color:var(--yellow)}
-.response-body{padding:12px;font-family:'Fira Code',monospace;font-size:11px;max-height:400px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;color:var(--text2)}
-.response-actions button{background:var(--bg);border:1px solid var(--border);color:var(--text3);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;margin-left:4px}
-.mobile-toggle{display:none;position:fixed;top:12px;left:12px;z-index:200;width:40px;height:40px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:18px;cursor:pointer}
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
-.overlay.show{display:block}
-::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-@media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.mobile-toggle{display:flex;align-items:center;justify-content:center}.hero{padding:70px 20px 30px}.hero h1{font-size:24px}.auth-section{padding:16px 20px}.content{padding:20px}.endpoint-desc{display:none}.param-grid{grid-template-columns:1fr 1fr}.loading-bar{left:0}}
-</style>
-</head>
-<body>
-
-<div class="loading-bar" id="loadingBar"><div class="progress" id="loadingProgress"></div></div>
-<button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
-<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-header"><h1>🎬 Captain Sapimu</h1><p>API Documentation v3.0</p></div>
-  <div class="sidebar-search"><input type="text" id="searchInput" placeholder="Search platform..." oninput="filterPlatforms()"></div>
-  <div class="sidebar-stats">
-    <div class="stat-badge"><div class="num" id="statPlatforms">42</div><div class="label">Platforms</div></div>
-    <div class="stat-badge"><div class="num" id="statEndpoints">0</div><div class="label">Endpoints</div></div>
-  </div>
-  <nav class="sidebar-nav" id="sidebarNav"></nav>
-</aside>
-
-<div class="main">
-  <div class="hero">
-    <h1>🎬 <span>Captain Sapimu</span> API</h1>
-    <p>42 platform short drama. IDs pre-loaded untuk instant access!</p>
-    <div class="hero-badges">
-      <div class="hero-badge"><strong id="badgePlatforms">42</strong> Platforms</div>
-      <div class="hero-badge"><strong id="badgeEndpoints">0</strong> Endpoints</div>
-      <div class="hero-badge"><strong>⚡ Instant</strong> IDs</div>
-      <div class="hero-badge"><strong>Multi-lang</strong></div>
-    </div>
-  </div>
-
-  <div class="auth-section">
-    <div class="auth-box">
-      <h3>🔐 Authentication</h3>
-      <div class="token-row">
-        <input type="text" id="tokenInput" placeholder="Paste token...">
-        <button onclick="saveToken()">💾 Save & Load IDs</button>
-      </div>
-      <div class="token-status">
-        <span class="token-dot inactive" id="tokenDot"></span>
-        <span id="tokenStatusText" style="color:var(--text3)">Token not set</span>
-      </div>
-      <div class="prefetch-status" id="prefetchStatus">Click "Save & Load IDs" to pre-fetch all drama IDs</div>
-    </div>
-  </div>
-
-  <div class="content" id="content"></div>
-</div>
-
 <script>
 var DIRECT='https://captain.sapimu.au';
 var PROXY='/api/proxy';
 var isLocal=['localhost','127.0.0.1'].indexOf(window.location.hostname)!==-1;
 var TOKEN_DEFAULT="53d25de32c37b0fcd2b14a9f834050493cc044d5039b5aff3283da73a8ef761b";
-var CACHE_KEY="sapimu_cache_v7";
+var CACHE_KEY="sapimu_cache_v8";
 var LANGS=[{c:"id",n:"Indonesian"},{c:"en",n:"English"},{c:"th",n:"Thai"},{c:"vi",n:"Vietnamese"},{c:"pt",n:"Portuguese"},{c:"es",n:"Spanish"},{c:"ja",n:"Japanese"},{c:"ko",n:"Korean"},{c:"zh",n:"Chinese"},{c:"ar",n:"Arabic"},{c:"fr",n:"French"},{c:"de",n:"German"}];
 
 function makeUrl(apiPath,queryParams){
@@ -184,6 +24,7 @@ function directUrl(apiPath,queryParams){
 
 var cache={ids:{},chapters:{}};
 var failedPlatforms=[];
+var failedErrors={};
 function wait(ms){return new Promise(function(r){setTimeout(r,ms)})}
 function loadCache(){try{var s=localStorage.getItem(CACHE_KEY);if(s)cache=JSON.parse(s);}catch(e){}}
 function saveCache(){try{localStorage.setItem(CACHE_KEY,JSON.stringify(cache));}catch(e){}}
@@ -579,7 +420,79 @@ function loadToken(){
 }
 
 // ============================================
-// SEQUENTIAL FETCH WITH LONG DELAYS
+// FETCH WITH DEBUG INFO
+// ============================================
+async function fetchPlatformIds(k){
+  var pl=P[k];if(!pl.l)return[];
+  if(cache.ids[k]&&cache.ids[k].length)return cache.ids[k];
+  var token=getToken();
+  var url=makeUrl(k+pl.l,{});
+
+  for(var attempt=0;attempt<3;attempt++){
+    try{
+      var r=await fetch(url,{headers:{'Authorization':'Bearer '+token}});
+      var txt=await r.text();
+      
+      // Debug: log raw response
+      console.log(k+' ['+r.status+'] size:'+txt.length);
+      
+      if(!r.ok){
+        console.warn(k+' error response:', txt.substring(0,200));
+        failedErrors[k]='HTTP '+r.status;
+        if(attempt<2){await wait(3000*(attempt+1));continue;}
+        return[];
+      }
+      
+      var j;
+      try{j=JSON.parse(txt);}catch(pe){
+        console.warn(k+' JSON parse error:', txt.substring(0,200));
+        failedErrors[k]='Invalid JSON';
+        if(attempt<2){await wait(3000*(attempt+1));continue;}
+        return[];
+      }
+      
+      // Check if proxy returned error
+      if(j.proxy_error){
+        console.warn(k+' proxy error:', j);
+        failedErrors[k]='Proxy: '+j.status+' '+(j.body||'').substring(0,100);
+        if(attempt<2){await wait(3000*(attempt+1));continue;}
+        return[];
+      }
+      
+      var d=j;
+      if(pl.pa){var parts=pl.pa.split('.');for(var pi=0;pi<parts.length;pi++){d=d?d[parts[pi]]:undefined;}}
+      if(!Array.isArray(d)){
+        if(d&&d.list)d=d.list;
+        else if(d&&d.dramas)d=d.dramas;
+        else if(d&&d.items)d=d.items;
+        else if(d&&d.hall_list)d=d.hall_list;
+        else if(d&&typeof d==='object'){var vals=Object.values(d);d=Array.isArray(vals[0])?vals[0]:[];}
+        else d=[];
+      }
+      if(!Array.isArray(d))d=[];
+
+      var items=d.slice(0,50).map(function(i){return{
+        id:String(i[pl.id]||i.id||i.book_id||i.bookId||i.code||i.playlet_id||i.dcup||''),
+        t:(i[pl.t]||i.title||i.name||i.bookName||'Unknown').substring(0,40)
+      }}).filter(function(x){return x.id});
+
+      if(items.length===0){
+        failedErrors[k]='0 items parsed from response';
+        console.warn(k+' 0 items. Response keys:', Object.keys(j));
+      }
+      
+      cache.ids[k]=items;return items;
+    }catch(e){
+      console.error(k+' attempt '+(attempt+1)+' error:', e.message);
+      failedErrors[k]=e.message;
+      if(attempt<2)await wait(3000*(attempt+1));
+    }
+  }
+  return[];
+}
+
+// ============================================
+// SEQUENTIAL FETCH
 // ============================================
 async function prefetchAll(){
   var token=getToken();if(!token)return;
@@ -587,6 +500,7 @@ async function prefetchAll(){
   var total=keys.length;
   var done=0,success=0;
   failedPlatforms=[];
+  failedErrors={};
 
   document.getElementById('loadingBar').classList.add('show');
   document.getElementById('prefetchStatus').className='prefetch-status loading';
@@ -612,45 +526,6 @@ async function prefetchAll(){
   populateAllDropdowns();
 }
 
-async function fetchPlatformIds(k){
-  var pl=P[k];if(!pl.l)return[];
-  if(cache.ids[k]&&cache.ids[k].length)return cache.ids[k];
-  var token=getToken();
-  var url=makeUrl(k+pl.l,{});
-
-  for(var attempt=0;attempt<3;attempt++){
-    try{
-      var r=await fetch(url,{headers:{'Authorization':'Bearer '+token}});
-      if(!r.ok){
-        if(attempt<2){await wait(3000*(attempt+1));continue;}
-        return[];
-      }
-      var j=await r.json();
-      var d=j;
-      if(pl.pa){var parts=pl.pa.split('.');for(var pi=0;pi<parts.length;pi++){d=d?d[parts[pi]]:undefined;}}
-      if(!Array.isArray(d)){
-        if(d&&d.list)d=d.list;
-        else if(d&&d.dramas)d=d.dramas;
-        else if(d&&d.items)d=d.items;
-        else if(d&&d.hall_list)d=d.hall_list;
-        else if(d&&typeof d==='object'){var vals=Object.values(d);d=Array.isArray(vals[0])?vals[0]:[];}
-        else d=[];
-      }
-      if(!Array.isArray(d))d=[];
-
-      var items=d.slice(0,50).map(function(i){return{
-        id:String(i[pl.id]||i.id||i.book_id||i.bookId||i.code||i.playlet_id||i.dcup||''),
-        t:(i[pl.t]||i.title||i.name||i.bookName||'Unknown').substring(0,40)
-      }}).filter(function(x){return x.id});
-
-      cache.ids[k]=items;return items;
-    }catch(e){
-      if(attempt<2)await wait(3000*(attempt+1));
-    }
-  }
-  return[];
-}
-
 function updateNavStatus(k){
   var nav=document.querySelector('.nav-item[data-key="'+k+'"]');if(!nav)return;
   var old=nav.querySelector('.nav-status');if(old)old.remove();
@@ -666,9 +541,20 @@ function finishPrefetch(success,total){
     document.getElementById('prefetchStatus').className='prefetch-status done';
     document.getElementById('prefetchStatus').textContent='✓ All '+total+' loaded! ('+totalIds+' IDs)';
   }else{
+    // Show error details
+    var errorDetails=failedPlatforms.map(function(k){
+      return P[k].n+': '+(failedErrors[k]||'unknown');
+    }).join('\n');
+    console.error('Failed platforms:\n'+errorDetails);
+    
     document.getElementById('prefetchStatus').className='prefetch-status error';
-    document.getElementById('prefetchStatus').innerHTML='⚠ '+success+'/'+total+' loaded ('+totalIds+' IDs). <button onclick="retryFailed()" style="background:var(--yellow);color:#000;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-weight:600">🔄 Retry '+failedPlatforms.length+'</button><br><small style="color:var(--text3)">Failed: '+failedPlatforms.map(function(k){return P[k].n}).join(', ')+'</small>';
+    document.getElementById('prefetchStatus').innerHTML='⚠ '+success+'/'+total+' loaded ('+totalIds+' IDs). <button onclick="retryFailed()" style="background:var(--yellow);color:#000;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-weight:600">🔄 Retry '+failedPlatforms.length+'</button> <button onclick="showErrors()" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);padding:4px 12px;border-radius:4px;cursor:pointer">🔍 Show Errors</button><br><small style="color:var(--text3)">Failed: '+failedPlatforms.map(function(k){return P[k].n}).join(', ')+'</small><pre id="errorLog" style="display:none;margin-top:8px;font-size:10px;color:var(--red);max-height:200px;overflow:auto">'+errorDetails+'</pre>';
   }
+}
+
+function showErrors(){
+  var el=document.getElementById('errorLog');
+  if(el)el.style.display=el.style.display==='none'?'block':'none';
 }
 
 async function retryFailed(){
@@ -678,7 +564,7 @@ async function retryFailed(){
   for(var i=0;i<toRetry.length;i++){
     var k=toRetry[i];
     document.getElementById('prefetchStatus').textContent='Retrying ['+(i+1)+'/'+toRetry.length+'] '+P[k].n+'...';
-    delete cache.ids[k];
+    delete cache.ids[k];delete failedErrors[k];
     try{var items=await fetchPlatformIds(k);if(items.length>0){success++;saveCache();}else failedPlatforms.push(k);}
     catch(e){failedPlatforms.push(k);}
     updateNavStatus(k);
@@ -708,7 +594,7 @@ function populateAllDropdowns(){
 }
 
 // ============================================
-// URL BUILDERS
+// URL
 // ============================================
 function getApiPath(k,i){
   var ep=P[k].ep[i];var p=ep.p;
@@ -720,7 +606,6 @@ function getApiPath(k,i){
   });
   return p;
 }
-
 function getQueryParams(k,i){
   var ep=P[k].ep[i];var params={};
   if(ep.ty==='list'){
@@ -728,16 +613,9 @@ function getQueryParams(k,i){
     var limit=document.getElementById('q-'+k+'-'+i+'-limit');if(limit&&limit.value)params.limit=limit.value;
     var lang=document.getElementById('q-'+k+'-'+i+'-lang');if(lang&&lang.value)params.lang=lang.value;
   }
-  if(ep.q){
-    Object.keys(ep.q).forEach(function(qk){
-      if(['page','limit','lang'].indexOf(qk)!==-1)return;
-      var el=document.getElementById('q-'+k+'-'+i+'-'+qk);
-      if(el&&el.value&&el.value.trim())params[qk]=el.value.trim();
-    });
-  }
+  if(ep.q){Object.keys(ep.q).forEach(function(qk){if(['page','limit','lang'].indexOf(qk)!==-1)return;var el=document.getElementById('q-'+k+'-'+i+'-'+qk);if(el&&el.value&&el.value.trim())params[qk]=el.value.trim();});}
   return params;
 }
-
 function buildFetchUrl(k,i){return makeUrl(k+getApiPath(k,i),getQueryParams(k,i))}
 function buildDisplayUrl(k,i){return directUrl(k+getApiPath(k,i),getQueryParams(k,i))}
 function updateUrl(k,i){var el=document.getElementById('url-'+k+'-'+i);if(el)el.value=buildDisplayUrl(k,i);}
@@ -753,7 +631,6 @@ function renderSidebar(){
   var sorted=Object.entries(P).sort(function(a,b){return a[1].n.localeCompare(b[1].n)});
   nav.innerHTML=sorted.map(function(e){var k=e[0],p=e[1];return'<div class="nav-item" data-key="'+k+'" onclick="scrollTo(\''+k+'\')"><div class="nav-icon">'+p.n.slice(0,2).toUpperCase()+'</div><div class="nav-name">'+p.n+'</div><div class="nav-count">'+p.ep.length+'</div></div>'}).join('');
 }
-
 function hl(p){return p.replace(/:(\w+)/g,'<span class="param">:$1</span>')}
 
 function renderContent(){
@@ -764,25 +641,9 @@ function renderContent(){
     var eps=pl.ep.map(function(ep,i){
       var prs=extractParams(ep.p);var isList=ep.ty==='list';
       var paramHtml='<div class="param-grid">';
-      if(isList){
-        paramHtml+='<div class="param-item"><label>page <span class="opt">(opt)</span></label><div class="page-ctrl"><button onclick="changePage(\''+k+'\','+i+',-1)">−</button><input type="number" id="q-'+k+'-'+i+'-page" value="1" min="1" oninput="updateUrl(\''+k+'\','+i+')"><button onclick="changePage(\''+k+'\','+i+',1)">+</button></div></div><div class="param-item"><label>limit <span class="opt">(opt)</span></label><input type="number" id="q-'+k+'-'+i+'-limit" value="20" oninput="updateUrl(\''+k+'\','+i+')"></div><div class="param-item"><label>lang <span class="opt">(opt)</span></label><select id="q-'+k+'-'+i+'-lang" onchange="updateUrl(\''+k+'\','+i+')"><option value="">Auto</option>'+LANGS.map(function(l){return'<option value="'+l.c+'"'+(l.c==='id'?' selected':'')+'>'+l.n+'</option>'}).join('')+'</select></div>';
-      }
-      if(prs.length>0){
-        prs.forEach(function(pr){
-          if(ep.pr&&ep.pr[pr]===0){
-            paramHtml+='<div class="param-item"><label>'+pr+' <span class="req">*</span></label><input type="text" id="inp-'+k+'-'+i+'-'+pr+'" placeholder="'+pr+'" oninput="updateUrl(\''+k+'\','+i+')" value="'+(pr==='page'?'1':'')+'"></div>';
-          }else{
-            paramHtml+='<div class="param-item"><label>'+pr+' <span class="req">*</span></label><select id="sel-'+k+'-'+i+'-'+pr+'" onchange="updateUrl(\''+k+'\','+i+')"><option value="">Loading...</option></select><input type="text" id="inp-'+k+'-'+i+'-'+pr+'" placeholder="Or type ID" oninput="updateUrl(\''+k+'\','+i+')" style="margin-top:4px;font-size:10px"></div>';
-          }
-        });
-      }
-      if(ep.q){
-        Object.entries(ep.q).forEach(function(qe){
-          var qk=qe[0],qd=qe[1];
-          if(isList&&['page','limit','lang'].indexOf(qk)!==-1)return;
-          paramHtml+='<div class="param-item"><label>'+qk+' <span class="opt">(query)</span></label><input type="text" id="q-'+k+'-'+i+'-'+qk+'" placeholder="'+qd+'" oninput="updateUrl(\''+k+'\','+i+')"></div>';
-        });
-      }
+      if(isList){paramHtml+='<div class="param-item"><label>page <span class="opt">(opt)</span></label><div class="page-ctrl"><button onclick="changePage(\''+k+'\','+i+',-1)">−</button><input type="number" id="q-'+k+'-'+i+'-page" value="1" min="1" oninput="updateUrl(\''+k+'\','+i+')"><button onclick="changePage(\''+k+'\','+i+',1)">+</button></div></div><div class="param-item"><label>limit <span class="opt">(opt)</span></label><input type="number" id="q-'+k+'-'+i+'-limit" value="20" oninput="updateUrl(\''+k+'\','+i+')"></div><div class="param-item"><label>lang <span class="opt">(opt)</span></label><select id="q-'+k+'-'+i+'-lang" onchange="updateUrl(\''+k+'\','+i+')"><option value="">Auto</option>'+LANGS.map(function(l){return'<option value="'+l.c+'"'+(l.c==='id'?' selected':'')+'>'+l.n+'</option>'}).join('')+'</select></div>';}
+      if(prs.length>0){prs.forEach(function(pr){if(ep.pr&&ep.pr[pr]===0){paramHtml+='<div class="param-item"><label>'+pr+' <span class="req">*</span></label><input type="text" id="inp-'+k+'-'+i+'-'+pr+'" placeholder="'+pr+'" oninput="updateUrl(\''+k+'\','+i+')" value="'+(pr==='page'?'1':'')+'"></div>';}else{paramHtml+='<div class="param-item"><label>'+pr+' <span class="req">*</span></label><select id="sel-'+k+'-'+i+'-'+pr+'" onchange="updateUrl(\''+k+'\','+i+')"><option value="">Loading...</option></select><input type="text" id="inp-'+k+'-'+i+'-'+pr+'" placeholder="Or type ID" oninput="updateUrl(\''+k+'\','+i+')" style="margin-top:4px;font-size:10px"></div>';}});}
+      if(ep.q){Object.entries(ep.q).forEach(function(qe){var qk=qe[0],qd=qe[1];if(isList&&['page','limit','lang'].indexOf(qk)!==-1)return;paramHtml+='<div class="param-item"><label>'+qk+' <span class="opt">(query)</span></label><input type="text" id="q-'+k+'-'+i+'-'+qk+'" placeholder="'+qd+'" oninput="updateUrl(\''+k+'\','+i+')"></div>';});}
       paramHtml+='</div>';
       var defUrl=directUrl(k+ep.p,{});
       return '<div class="endpoint-card" id="'+k+'-'+i+'"><div class="endpoint-header" onclick="toggle(\''+k+'-'+i+'\')"><span class="method-badge method-'+ep.m+'">'+ep.m+'</span><span class="endpoint-path">'+hl(ep.p)+'</span><span class="endpoint-desc">'+ep.d+'</span><span class="endpoint-toggle">▼</span></div><div class="endpoint-detail"><div class="detail-section"><h4>Parameters</h4>'+paramHtml+'</div><div class="try-section"><div class="try-url"><input type="text" value="'+defUrl+'" id="url-'+k+'-'+i+'" readonly><button class="btn-copy" onclick="copy(\'url-'+k+'-'+i+'\')">📋</button><button class="btn-curl" onclick="copyCurl(\''+k+'\','+i+')">cURL</button><button class="btn-send" onclick="send(\''+k+'\','+i+')">▶ Send</button></div><div class="response-box" id="resp-'+k+'-'+i+'"><div class="response-header"><span class="response-status" id="rs-'+k+'-'+i+'"></span><div class="response-actions"><span id="rz-'+k+'-'+i+'"></span><button onclick="copy(\'rb-'+k+'-'+i+'\')">📋</button><button onclick="document.getElementById(\'resp-'+k+'-'+i+'\').style.display=\'none\'">✕</button></div></div><pre class="response-body" id="rb-'+k+'-'+i+'"></pre></div></div></div></div>';
@@ -792,9 +653,6 @@ function renderContent(){
   content.innerHTML=html;
 }
 
-// ============================================
-// INTERACTIONS
-// ============================================
 function toggle(id){document.getElementById(id).classList.toggle('open')}
 function scrollTo(k){document.getElementById('p-'+k).scrollIntoView({behavior:'smooth'});document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active')});var el=document.querySelector('.nav-item[data-key="'+k+'"]');if(el)el.classList.add('active');if(window.innerWidth<768)toggleSidebar();}
 function filterPlatforms(){var q=document.getElementById('searchInput').value.toLowerCase();document.querySelectorAll('.nav-item').forEach(function(n){n.style.display=n.querySelector('.nav-name').textContent.toLowerCase().indexOf(q)!==-1?'flex':'none'});document.querySelectorAll('.platform-section').forEach(function(s){s.style.display=s.querySelector('h2').textContent.toLowerCase().indexOf(q)!==-1?'block':'none'});}
@@ -804,8 +662,7 @@ function copyCurl(k,i){navigator.clipboard.writeText('curl "'+buildDisplayUrl(k,
 
 async function send(k,i){
   var t=getToken();if(!t)return alert('Set token first!');
-  var url=buildFetchUrl(k,i);
-  var ep=P[k].ep[i];
+  var url=buildFetchUrl(k,i);var ep=P[k].ep[i];
   var box=document.getElementById('resp-'+k+'-'+i);
   var st=document.getElementById('rs-'+k+'-'+i);
   var sz=document.getElementById('rz-'+k+'-'+i);
@@ -817,20 +674,14 @@ async function send(k,i){
     st.textContent=r.status+' '+r.statusText;st.className='response-status '+(r.ok?'ok':'err');
     sz.textContent=(txt.length/1024).toFixed(1)+'KB';
     try{bd.textContent=JSON.stringify(JSON.parse(txt),null,2)}catch(e2){bd.textContent=txt}
-  }catch(e){
-    st.textContent='❌ Error';st.className='response-status err';
-    bd.textContent='Error: '+e.message;
-  }
+  }catch(e){st.textContent='❌ Error';st.className='response-status err';bd.textContent='Error: '+e.message;}
 }
 
-// ============================================
 // INIT
-// ============================================
 document.getElementById('statPlatforms').textContent=Object.keys(P).length;
 document.getElementById('statEndpoints').textContent=totalEp;
 document.getElementById('badgePlatforms').textContent=Object.keys(P).length;
 document.getElementById('badgeEndpoints').textContent=totalEp;
-
 loadCache();renderSidebar();renderContent();loadToken();
 
 async function init(){
@@ -838,34 +689,16 @@ async function init(){
     try{
       var r=await fetch('/api/proxy');
       var j=await r.json();
-      if(j.status!=='ok'){
-        document.getElementById('prefetchStatus').className='prefetch-status error';
-        document.getElementById('prefetchStatus').textContent='❌ Proxy error: '+JSON.stringify(j);
-        return;
-      }
-    }catch(e){
-      document.getElementById('prefetchStatus').className='prefetch-status error';
-      document.getElementById('prefetchStatus').textContent='❌ Proxy not found: '+e.message;
-      return;
-    }
+      if(j.status!=='ok'){document.getElementById('prefetchStatus').className='prefetch-status error';document.getElementById('prefetchStatus').textContent='❌ Proxy error';return;}
+    }catch(e){document.getElementById('prefetchStatus').className='prefetch-status error';document.getElementById('prefetchStatus').textContent='❌ Proxy not found: '+e.message;return;}
   }
   var cached=Object.keys(cache.ids).filter(function(k){return cache.ids[k]&&cache.ids[k].length}).length;
   if(cached>0){
-    populateAllDropdowns();
-    Object.keys(cache.ids).forEach(function(k){updateNavStatus(k)});
+    populateAllDropdowns();Object.keys(cache.ids).forEach(function(k){updateNavStatus(k)});
     var totalIds=0;Object.values(cache.ids).forEach(function(a){totalIds+=a.length});
-    if(cached>=Object.keys(P).length){
-      document.getElementById('prefetchStatus').className='prefetch-status done';
-      document.getElementById('prefetchStatus').textContent='✓ Cache loaded! ('+totalIds+' IDs, '+cached+' platforms)';
-    }else{
-      document.getElementById('prefetchStatus').className='prefetch-status done';
-      document.getElementById('prefetchStatus').innerHTML='✓ Cache: '+cached+'/'+Object.keys(P).length+' ('+totalIds+' IDs). <button onclick="prefetchAll()" style="background:var(--accent);color:#fff;border:none;padding:4px 12px;border-radius:4px;cursor:pointer">Load remaining</button>';
-    }
-  }else if(getToken()){
-    setTimeout(prefetchAll,300);
-  }
+    if(cached>=Object.keys(P).length){document.getElementById('prefetchStatus').className='prefetch-status done';document.getElementById('prefetchStatus').textContent='✓ Cache loaded! ('+totalIds+' IDs, '+cached+' platforms)';}
+    else{document.getElementById('prefetchStatus').className='prefetch-status done';document.getElementById('prefetchStatus').innerHTML='✓ Cache: '+cached+'/'+Object.keys(P).length+' ('+totalIds+' IDs). <button onclick="prefetchAll()" style="background:var(--accent);color:#fff;border:none;padding:4px 12px;border-radius:4px;cursor:pointer">Load remaining</button>';}
+  }else if(getToken()){setTimeout(prefetchAll,300);}
 }
 init();
 </script>
-</body>
-</html>
