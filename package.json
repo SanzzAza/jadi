@@ -3,16 +3,10 @@
   "version": "3.0.0",
   "description": "Captain Sapimu - API Documentation for 42 Short Drama Platforms",
   "private": true,
-  "scripts": {
-    "dev": "npx serve public -l 3000",
-    "start": "npx serve public"
+  "engines": {
+    "node": ">=18"
   },
-  "keywords": [
-    "api",
-    "documentation",
-    "short-drama",
-    "captain-sapimu"
-  ],
-  "author": "Captain Sapimu",
-  "license": "MIT"
+  "scripts": {
+    "dev": "npx serve public -l 3000"
+  }
 }
