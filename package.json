@@ -1,12 +1,6 @@
 {
   "name": "captain-sapimu-docs",
   "version": "3.0.0",
-  "description": "Captain Sapimu - API Documentation for 42 Short Drama Platforms",
   "private": true,
-  "engines": {
-    "node": ">=18"
-  },
-  "scripts": {
-    "dev": "npx serve public -l 3000"
-  }
+  "type": "module"
 }
