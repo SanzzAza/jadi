@@ -1,46 +1,82 @@
-export default async function handler(req, res) {
-  // CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+export const config = {
+  runtime: 'edge',
+  regions: ['sin1'], // Singapore - lebih dekat ke API
+};
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+export default async function handler(request) {
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+  };
+
+  // Handle CORS preflight
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { status: 200, headers: corsHeaders });
   }
 
+  const url = new URL(request.url);
+  
   // Health check
-  const { path } = req.query;
-  if (!path || path.length === 0) {
-    return res.status(200).json({ status: 'ok', message: 'Proxy working!' });
+  if (url.pathname === '/api' || url.pathname === '/api/') {
+    return new Response(JSON.stringify({ 
+      status: 'ok', 
+      time: new Date().toISOString() 
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
 
-  // Build path
-  const targetPath = Array.isArray(path) ? path.join('/') : path;
-  const queryString = Object.entries(req.query)
-    .filter(([k]) => k !== 'path')
-    .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
-    .join('&');
+  // Extract path: /api/bilitv/api/v1/home -> bilitv/api/v1/home
+  const pathAfterApi = url.pathname.replace(/^\/api\//, '');
+  
+  if (!pathAfterApi) {
+    return new Response(JSON.stringify({ error: 'No path' }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
 
-  const targetUrl = `https://captain.sapimu.au/${targetPath}${queryString ? '?' + queryString : ''}`;
+  // Build target URL with query params
+  const targetUrl = new URL(`https://captain.sapimu.au/${pathAfterApi}`);
+  url.searchParams.forEach((v, k) => targetUrl.searchParams.set(k, v));
 
   try {
-    const response = await fetch(targetUrl, {
-      method: req.method,
+    // Fetch with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 9000); // 9s timeout
+
+    const response = await fetch(targetUrl.toString(), {
+      method: request.method,
       headers: {
-        'Authorization': req.headers.authorization || '',
-        'Content-Type': 'application/json',
+        'Authorization': request.headers.get('Authorization') || '',
+        'Accept': 'application/json',
+        'User-Agent': 'CaptainSapimu/3.0',
+      },
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    const data = await response.text();
+
+    return new Response(data, {
+      status: response.status,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': response.headers.get('Content-Type') || 'application/json',
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
       },
     });
 
-    const data = await response.text();
-    
-    res.setHeader('Content-Type', 'application/json');
-    res.status(response.status).send(data);
-
   } catch (error) {
-    res.status(500).json({ 
-      error: error.message, 
-      url: targetUrl 
+    const isTimeout = error.name === 'AbortError';
+    return new Response(JSON.stringify({ 
+      error: isTimeout ? 'Request timeout' : error.message,
+      path: pathAfterApi,
+    }), {
+      status: isTimeout ? 504 : 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 }
